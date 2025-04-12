@@ -200,4 +200,5 @@ class MooseSupervisor(Supervisor):
 
 
 if __name__ == "__main__":
+    print("Início da execução...")
     MooseSupervisor().run()
