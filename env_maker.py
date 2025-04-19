@@ -1,8 +1,14 @@
+import random
+
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+from perlin_noise import PerlinNoise
 
-PATH_FILE="worlds/moose_demo.wbt"
+def replacer(match):
+    return f"{match.group(1)}{formated_heights}{match.group(3)}"
+
+PATH_FILE="./worlds/moose_demo.wbt"
 with open(file=PATH_FILE,mode='r') as f:
     data= f.read()
 
@@ -18,21 +24,28 @@ if match:
     heights=np.array([float(s.strip()) for s in heights_strings.split(',') if s.strip()])
 
     #---------------------CODE TO ALTER THE ELEVATION MAP------------------------#
+    perlin_noise = PerlinNoise(dimension=2,octaves=2,unbias=True)
+    #modifed_heights=heights/3
+    modified_heights=[]
 
-    modifed_heights=heights/3
-
+    # 200 is the size of our elevation grid this could be done with code if we read it from the .wbt file directly
+    for j in range (200):
+        for i in range (200):
+            new_height= perlin_noise(i+random.random(),j+random.random())
+            modified_heights.append(new_height)
     #---------------------CODE TO ALTER THE ELEVATION MAP------------------------#
 
-    formated_heights=',\n '.join(f"{height:.6f}" for height in modifed_heights)
+    formated_heights=',\n '.join(f"{height:.6f}" for height in modified_heights)
 
     #replace the data
     updated_data=re.sub(r'(height\s*\[\s*)(.*?)(\s*\])',
-                        rf'\1{formated_heights}\3',
+                        replacer,
                         data,
                         flags=re.DOTALL
     )
-    
-    with open(PATH_FILE,mode='w') as f:
+
+    PATH_NEW_FILE="worlds/moose_perlin.wbt"
+    with open(PATH_NEW_FILE,mode='w') as f:
         f.write(updated_data)
 
 
