@@ -33,11 +33,9 @@ WorldInfo {
     }
   ]
 }
-Viewpoint {
-  orientation -0.22311591330269342 0.05825670531162727 0.9730495596408947 2.6439975480361126
-  position 172.19406764621098 -47.0839203474995 48.12887734027179
-  near 1
-  follow "moose"
+DEF VIEWPOINT Viewpoint {
+  orientation 0 1 0 0
+  position 0 10 10
 }
 TexturedBackground {
 }
