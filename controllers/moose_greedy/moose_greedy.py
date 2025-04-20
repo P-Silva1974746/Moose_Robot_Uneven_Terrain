@@ -81,14 +81,77 @@ class MooseGreedySupervisor(Supervisor):
             if self.heuristic(start, goal) >= min_distance:
                 return start, goal
 
+    #def move_along_path(self, path):
+     #   translation_field = self.robot.getField("translation")
+      #  for x, y in path:
+       #     pos = self.grid_to_world(x, y)
+        #    translation_field.setSFVec3f(pos)
+         #   for _ in range(10):  # Esperar para visualização
+          #      if self.step(self.timestep) == -1:
+           #         return
+
     def move_along_path(self, path):
-        translation_field = self.robot.getField("translation")
+        from math import atan2, degrees
+
+        left_motor = self.getDevice("left_wheel_motor")   #webots: adicionar motores com estes nomes
+        right_motor = self.getDevice("right_wheel_motor")
+        left_motor.setPosition(float("inf"))
+        right_motor.setPosition(float("inf"))
+        left_motor.setVelocity(0.0)
+        right_motor.setVelocity(0.0)
+
+        gps = self.getDevice("gps")
+        compass = self.getDevice("compass")
+        gps.enable(self.timestep)
+        compass.enable(self.timestep)
+
+        def get_bearing(): #ângulo em relação ao ponto de referência. direção
+            c = compass.getValues()
+            rad = atan2(c[0], c[2])  #ângulo
+            bearing = (rad - 1.5708) * 180.0 / math.pi  #para graus
+            return (bearing + 360) % 360  #entre 0 e 360º
+
+        def angle_to_target(curr_pos, target_pos):
+            dx = target_pos[0] - curr_pos[0]
+            dz = target_pos[2] - curr_pos[2]
+            angle = degrees(atan2(dx, dz))
+            return (angle + 360) % 360
+
         for x, y in path:
-            pos = self.grid_to_world(x, y)
-            translation_field.setSFVec3f(pos)
-            for _ in range(10):  # Esperar para visualização
-                if self.step(self.timestep) == -1:
-                    return
+            target = self.grid_to_world(x, y)
+            while self.step(self.timestep) != -1:
+                pos = gps.getValues()
+                bearing = get_bearing()
+                target_angle = angle_to_target(pos, target)
+
+                angle_diff = target_angle - bearing
+                #entre -180 e 180
+                if angle_diff > 180:
+                    angle_diff -= 360
+                elif angle_diff < -180:
+                    angle_diff += 360
+
+                #alinhar
+                if abs(angle_diff) > 5:
+                    if angle_diff > 0: #esquerda
+                        left_motor.setVelocity(-1.0)
+                        right_motor.setVelocity(1.0)
+                    else: #direita
+                        left_motor.setVelocity(1.0)
+                        right_motor.setVelocity(-1.0)
+                else: #frente
+                    left_motor.setVelocity(2.0)
+                    right_motor.setVelocity(2.0)
+
+                    #parar
+                    dx = target[0] - pos[0]
+                    dz = target[2] - pos[2]
+                    distance = math.sqrt(dx**2 + dz**2)
+                    if distance < 0.1:
+                        break
+
+        left_motor.setVelocity(0.0)
+        right_motor.setVelocity(0.0)
 
     def run(self):
         start, goal = self.generate_random_points()
@@ -98,11 +161,11 @@ class MooseGreedySupervisor(Supervisor):
         path = self.greedy_search(start, goal)
 
         if len(path) < 2:
-            print("Caminho não encontrado.")
+            print("Caminho não encontrado")
             return
 
         self.move_along_path(path)
-        print("Chegada ao destino com sucesso!")
+        print("Chegada ao destino")
 
 if __name__ == "__main__":
     print("Iniciando execução...")
