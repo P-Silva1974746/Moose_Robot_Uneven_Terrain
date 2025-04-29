@@ -3,9 +3,12 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/SandyGround.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/trees/protos/Sassafras.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/GlossyPaint.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/MattePaint.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/clearpath/moose/protos/Moose.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/trees/protos/Sassafras.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/trees/protos/Oak.proto"
+
 
 WorldInfo {
   info [
@@ -40065,39 +40068,33 @@ DEF ELEVATION_GRID Solid {
   boundingObject USE EG
   locked TRUE
 }
-
 DEF MOOSEROBOT Robot {
   supervisor TRUE
   translation -7.334202170180788 6.427717293600236 7.717722754844717
   rotation -0.17944105748033282 0.1417470454058144 0.9735033035429627 0.5293334021982316
   controller "<extern>"
-  
-  
+
   physics Physics {
-  	mass 10
-  	centerOfMass 0 0 0
-  	inertiaMatrix [
-  		1 1 1
-  		0 0 0
-  	]
-	}
-  
+    mass 10
+    centerOfMass 0 0 0
+    inertiaMatrix [ 1 1 1  0 0 0 ]
+  }
+
   children [
     Moose {
       # Configurações específicas do Moose
     }
-    Compass {
-    }
+    Compass { }
     GPS {
-      type "satellite"        # Tipo do GPS
-      accuracy 0.0            # Precisão
-      noiseCorrelation 0.0    # Correlação de ruído
-      resolution -1.0         # Resolução
-      speedNoise 0.0          # Ruído da velocidade
-      speedResolution -1.0    # Resolução da velocidade
+      type "satellite"
+      accuracy 0.0
+      noiseCorrelation 0.0
+      resolution -1.0
+      speedNoise 0.0
+      speedResolution -1.0
     }
     Lidar {
-      tiltAngle 0.0           # Ângulo de inclinação
+      tiltAngle 0.0
       horizontalResolution 512
       fieldOfView 1.5708
       verticalFieldOfView 0.2
@@ -40125,6 +40122,211 @@ DEF MOOSEROBOT Robot {
       accuracy 0.0
       resolution -1.0
     }
+
+    # === RODAS DIREITAS COM MOOSEWHEEL ===
+    Pose {
+      translation 0.95 -0.6 -0.06
+      rotation 0 0 1 3.14159
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 -1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "right_motor_1"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "right_wheel_1" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation 0.27 -0.6 -0.06
+      rotation 0 0 1 3.14159
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 -1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "right_motor_2"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "right_wheel_2" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation -0.42 -0.6 -0.06
+      rotation 0 0 1 3.14159
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 -1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "right_motor_3"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "right_wheel_3" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation -1.1 -0.6 -0.06
+      rotation 0 0 1 3.14159
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 -1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "right_motor_4"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "right_wheel_4" }
+          }
+        }
+      ]
+    }
+
+    # === RODAS ESQUERDAS COM MOOSEWHEEL ===
+    Pose {
+      translation 0.95 0.6 -0.06
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "left_motor_1"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "left_wheel_1" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation 0.27 0.6 -0.06
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "left_motor_2"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "left_wheel_2" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation -0.42 0.6 -0.06
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "left_motor_3"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "left_wheel_3" }
+          }
+        }
+      ]
+    }
+
+    Pose {
+      translation -1.1 0.6 -0.06
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 1 0
+            suspensionSpringConstant 100000
+            suspensionDampingConstant 100000
+            suspensionAxis 0 0 1
+          }
+          device [
+            RotationalMotor {
+              name "left_motor_4"
+              maxTorque 1000
+              maxVelocity 26
+            }
+          ]
+          endPoint Slot {
+            type "vehicle wheel"
+            endPoint MooseWheel { name "left_wheel_4" }
+          }
+        }
+      ]
+    }
   ]
 }
-
