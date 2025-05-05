@@ -295,6 +295,7 @@ class MooseSupervisor(Supervisor):
         stable_time = 0.0
         last_pos = self.gps.getValues()
 
+
         while stable_time < duration:
             if self.step(self.timestep) == -1:
                 return
