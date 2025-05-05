@@ -5,13 +5,12 @@ import time
 import csv
 import matplotlib.pyplot as plt
 import os
+from scipy.ndimage import gaussian_filter
 from controller import Supervisor
+
 class MooseSupervisor(Supervisor):
     def __init__(self):
         super().__init__()
-        # Prints de debug para inicialização
-        print("Inicializando MooseSupervisor...")
-
         # Configurações
         self.timestep = int(self.getBasicTimeStep())
         self.battery_max_energy = 100.0
@@ -21,15 +20,21 @@ class MooseSupervisor(Supervisor):
         # Robot e terreno
         self.robot = self.getFromDef('MOOSEROBOT')
         self.moose_node = self.robot.getField("children").getMFNode(0)  # Assume que Moose é o primeiro filho
+
+        self.elevation_field = self.getFromDef("EG").getField("height")
         self.elevation_grid = self.getFromDef('EG')
         self.height_field = self.elevation_grid.getField('height')
-        self.height_values = [self.height_field.getMFFloat(i) for i in range(self.height_field.getCount())]
+
         self.x_dim = self.elevation_grid.getField('xDimension').getSFInt32()
         self.y_dim = self.elevation_grid.getField('yDimension').getSFInt32()
         self.x_spacing = self.elevation_grid.getField('xSpacing').getSFFloat()
         self.y_spacing = self.elevation_grid.getField('ySpacing').getSFFloat()
-        print(f"Dimensões do grid: {self.x_dim} x {self.y_dim}")
-        print(f"Espaçamento entre células: {self.x_spacing}, {self.y_spacing}")
+
+        self.height_values = [self.height_field.getMFFloat(i) for i in range(self.height_field.getCount())]
+        self.elevation_map = self.get_elevation_map()  # <-- Agora pode chamar
+
+        sigma = 1  # ou qualquer valor apropriado
+        self.smoothed_elevation_map = gaussian_filter(self.elevation_map, sigma=sigma)
 
         # Motores
         self.left_motors = [
@@ -59,14 +64,9 @@ class MooseSupervisor(Supervisor):
         self.imu = self.getDevice("inertial unit")
         self.imu.enable(self.timestep)
 
-        # Terreno
-        self.elevation_grid = self.getFromDef('EG')
-        self.height_field = self.elevation_grid.getField('height')
-        self.height_values = [self.height_field.getMFFloat(i) for i in range(self.height_field.getCount())]
-        self.x_dim = self.elevation_grid.getField('xDimension').getSFInt32()
-        self.y_dim = self.elevation_grid.getField('yDimension').getSFInt32()
-        self.x_spacing = self.elevation_grid.getField('xSpacing').getSFFloat()
-        self.y_spacing = self.elevation_grid.getField('ySpacing').getSFFloat()
+        self.lidar = self.getDevice("lidar")
+        self.lidar.enable(self.timestep)
+        self.lidar.enablePointCloud()
 
         # Log e bateria
         self.battery_levels = []
@@ -74,17 +74,42 @@ class MooseSupervisor(Supervisor):
         if not os.path.exists(self.image_folder):
             os.makedirs(self.image_folder)
 
+    def get_elevation_map(self):
+        count = self.height_field.getCount()
+        height_values = [self.height_field.getMFFloat(i) for i in range(count)]
+        elevation_map = [
+            height_values[i * self.x_dim:(i + 1) * self.x_dim]
+            for i in range(self.y_dim)
+        ]
+        return elevation_map
+
+    def set_robot_position(self, x, y, yaw=0.0):
+        z = self.height_at(x, y)
+        pos_field = self.robot.getField("translation")
+        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])  # Ajuste do z + altura segura
+
+        rot_field = self.robot.getField("rotation")
+        # Roda em torno do eixo Y ([0, 1, 0]) com ângulo `yaw` (em radianos)
+        rot_field.setSFRotation([0, 1, 0, yaw])
+
+        self.step(self.timestep)
+
     def height_at(self, x, y):
+        x = int(x)
+        y = int(y)
+        x = max(0, min(x, self.x_dim - 1))  # Garantir que x esteja dentro do grid
+        y = max(0, min(y, self.y_dim - 1))  # Garantir que y esteja dentro do grid
         index = y * self.x_dim + x
-        print(f"Consultando altura para (x={x}, y={y}), índice {index}")
         return self.height_values[index]
 
     def heuristic(self, a, b):
-        print(f"Calculando heurística entre {a} e {b}")
+        #print(f"Calculando heurística entre {a} e {b}")
         return math.hypot(b[0] - a[0], b[1] - a[1])
 
     def neighbors(self, x, y):
-        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1),
+                (-1, -1), (-1, 1), (1, -1), (1, 1)]
+
         valid = []
         for dx, dy in dirs:
             nx, ny = x + dx, y + dy
@@ -95,14 +120,23 @@ class MooseSupervisor(Supervisor):
     def cost(self, current, neighbor):
         h1 = self.height_at(*current)
         h2 = self.height_at(*neighbor)
-        dh = abs(h2 - h1)
+        dx = neighbor[0] - current[0]
+        dy = neighbor[1] - current[1]
+        distance = math.hypot(dx, dy)
 
-        # Considera o impacto do terreno (subida/descida) no custo
-        terrain_cost = math.hypot(current[0] - neighbor[0], current[1] - neighbor[1])
-        return terrain_cost + dh * 2  # Aumenta o custo se a diferença de altura for grande
+        if distance == 0:
+            return float('inf')
+
+        slope_deg = math.degrees(math.atan2(abs(h2 - h1), distance))
+
+        return distance + abs(h2 - h1)  # custo com leve penalização
 
     def a_star(self, start, goal):
+        if start == goal:
+            return [start]
+
         print(f"Executando A* de {start} para {goal}")
+        visited = set()
         frontier = []
         heapq.heappush(frontier, (0, start))
         came_from = {start: None}
@@ -110,6 +144,9 @@ class MooseSupervisor(Supervisor):
 
         while frontier:
             _, current = heapq.heappop(frontier)
+            if current in visited:
+                continue
+            visited.add(current)
 
             if current == goal:
                 break
@@ -142,6 +179,8 @@ class MooseSupervisor(Supervisor):
         return [wx, wy, wz]
 
     def update_battery(self, prev_alt, curr_alt, speed):
+        consumption = 0
+        recovery = 0
         # Se o robô está subindo, a bateria é consumida mais rápido
         if curr_alt > prev_alt:
             consumption = 0.05 * (speed ** 2) * 1.5  # Mais consumo em subida
@@ -161,9 +200,7 @@ class MooseSupervisor(Supervisor):
             motor.setVelocity(right_speed)
 
     def go_to(self, target, tolerance=0.3):
-        MAX_SPEED = min(motor.getMaxVelocity() for motor in self.left_motors + self.right_motors)
-        print("Max velocity:", MAX_SPEED)
-        TURN_COEFFICIENT = 2.0
+        MAX_SPEED = 6.28  # Velocidade máxima do robô
 
         while self.step(self.timestep) != -1:
             pos = self.gps.getValues()
@@ -173,19 +210,17 @@ class MooseSupervisor(Supervisor):
 
             if distance < tolerance:
                 self.set_wheel_speeds(0.0, 0.0)
-                break
+                return True
 
             desired_angle = math.atan2(dy, dx)
             yaw = self.imu.getRollPitchYaw()[2]
-
             beta = desired_angle - yaw
             beta = (beta + math.pi) % (2 * math.pi) - math.pi
 
-            correction = TURN_COEFFICIENT * beta
+            correction = 2.0 * beta
             left_speed = MAX_SPEED - correction
             right_speed = MAX_SPEED + correction
 
-            # Saturar velocidades
             left_speed = max(-MAX_SPEED, min(MAX_SPEED, left_speed))
             right_speed = max(-MAX_SPEED, min(MAX_SPEED, right_speed))
 
@@ -194,7 +229,7 @@ class MooseSupervisor(Supervisor):
     def move_robot_and_log(self, path, euclidean_dist):
         print("Iniciando movimento...")
         translation_field = self.robot.getField('translation')
-        total_distance = 0
+        total_distance = 0.0  # agora é atualizado
         altitudes = []
 
         start_time = time.time()
@@ -202,70 +237,58 @@ class MooseSupervisor(Supervisor):
         last_alt = self.altimeter.getValue()
         altitudes.append(last_alt)
 
-        for x, y in path:
+        for i, (x, y) in enumerate(path):
             target_pos = self.grid_to_world(x, y)
             print(f"Movendo para: {target_pos}")
 
-            self.go_to(target_pos)
+            success = self.go_to(target_pos)
 
-            if self.step(self.timestep) == -1:
-                return
+            if not success:
+                print("Abortando caminho atual. Tentando nova rota...")
+                # Recalcula o caminho atual a partir da posição GPS real até o destino final
+                current_grid = (
+                    int(self.gps.getValues()[0] / self.x_spacing),
+                    int(self.gps.getValues()[1] / self.y_spacing)
+                )
+                new_path = self.a_star(current_grid, path[-1])
+                if len(new_path) > 1 and new_path[0] != new_path[-1]:
+                    self.move_robot_and_log(new_path, self.heuristic(current_grid, path[-1]))
+                else:
+                    print("Nenhuma rota alternativa viável encontrada.")
+                return  # Interrompe execução atual
 
-            current_pos = self.gps.getValues()
-            current_alt = self.altimeter.getValue()
-            print(f"Posição atual: {current_pos}, Altitude: {current_alt}")
+            # Atualiza bateria com base em altitude e velocidade
+            curr_alt = self.altimeter.getValue()
+            speed = euclidean_dist / self.timestep
+            self.update_battery(last_alt, curr_alt, speed)
 
-            distance = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(2)))
-            total_distance += distance
+            # Atualiza distâncias
+            distance_traveled = math.hypot(target_pos[0] - last_pos[0], target_pos[1] - last_pos[1])
+            total_distance += distance_traveled
 
-            speed = distance / (self.timestep / 1000 * 10)
-            self.update_battery(last_alt, current_alt, speed)
-
-            altitudes.append(current_alt)
-            last_pos = current_pos
-            last_alt = current_alt
-
-            self.battery_levels.append(self.battery_energy)
+            last_pos = target_pos
+            last_alt = curr_alt
+            altitudes.append(curr_alt)
 
         end_time = time.time()
-        duration = end_time - start_time
-        avg_speed = total_distance / duration
-        altitude_diff = max(altitudes) - min(altitudes)
+        total_time = end_time - start_time
+        print(f"Distância total percorrida: {total_distance} metros")
+        print(f"Tempo total: {total_time} segundos")
 
-        print(f"Execução concluída. Distância total: {total_distance:.2f} m, Tempo total: {duration:.2f} s")
-        self.log_data({
-            'time_sec': round(duration, 2),
-            'distance_m': round(total_distance, 2),
-            'avg_speed_mps': round(avg_speed, 2),
-            'battery_remaining': round(self.battery_energy, 2),
-            'altitude_diff_m': round(altitude_diff, 2),
-            'euclidean_dist_m': round(euclidean_dist, 2),
-            'path_len_cells': len(path)
-        })
-        self.plot_battery()
+        self.battery_levels.append(self.battery_energy)
 
-    def log_data(self, data, file_name="performance_log.csv"):
-        # Salva apenas a cada execução ou a cada N iterações
-        with open(file_name, mode='a', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=data.keys())
-            if file.tell() == 0:
-                writer.writeheader()
-            writer.writerow(data)
+        return total_distance, total_time
 
-    def plot_battery(self, plot_interval=10):
-        # Salva o gráfico apenas a cada 10 passos (ajustável)
-        if len(self.battery_levels) % plot_interval == 0:
-            plt.figure()
-            plt.plot(self.battery_levels, label="Nível de Bateria")
-            plt.xlabel("Iteração")
-            plt.ylabel("Bateria (%)")
-            plt.title("Curva de Consumo/Recarga da Bateria")
-            plt.grid(True)
+    def plot_battery(self):
+        plt.plot(self.battery_levels)
+        plt.title("Nível da bateria ao longo do tempo")
+        plt.xlabel("Passos")
+        plt.ylabel("Nível de Bateria (%)")
+        plt.savefig(f"{self.image_folder}/battery_plot_{int(time.time())}.png")
+        plt.close()
 
-            # Salva o gráfico como imagem na pasta 'battery_plots'
-            image_path = os.path.join(self.image_folder, f'battery_curve_{int(time.time())}.png')
-            plt.savefig(image_path)
-            plt.close()  # Fechar a figura após salvar para evitar sobrecarga de memória
+    def get_current_battery(self):
+        return self.battery_energy
 
     def wait_until_still(self, duration=1.0):
         """Espera até que o robô esteja parado por um certo tempo (em segundos)."""
@@ -289,6 +312,7 @@ class MooseSupervisor(Supervisor):
         goal = (random.randint(0, self.x_dim - 1), random.randint(0, self.y_dim - 1))
 
         print(f"Iniciando execução... Posição inicial: {start}, Meta: {goal}")
+        self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
         path = self.a_star(start, goal)
         print(f"Caminho calculado: {path}")
 
@@ -301,6 +325,8 @@ class MooseSupervisor(Supervisor):
         print(f"Distância euclidiana entre início e meta: {euclidean_dist:.2f} m")
         self.move_robot_and_log(path, euclidean_dist)
         print("Execução finalizada com sucesso.")
+
+# Esta implementação faz parte do código do robô Moose no Webots para navegação baseada no A*, com consumo de bateria e movimentos registrados.
 
 if __name__ == "__main__":
     print("Início da execução...")
