@@ -24,14 +24,17 @@ if match:
     heights=np.array([float(s.strip()) for s in heights_strings.split(',') if s.strip()])
 
     #---------------------CODE TO ALTER THE ELEVATION MAP------------------------#
-    perlin_noise = PerlinNoise(dimension=2,octaves=2,unbias=True)
+    noise_scale=0.025
+    perlin_noise = PerlinNoise(dimension=2,octaves=1,unbias=False)
     #modifed_heights=heights/3
     modified_heights=[]
 
     # 200 is the size of our elevation grid this could be done with code if we read it from the .wbt file directly
     for j in range (200):
         for i in range (200):
-            new_height= perlin_noise(i+random.random(),j+random.random())
+            new_height= perlin_noise((i+random.random())*noise_scale,(j+random.random())*noise_scale)*20
+            #new_height=0
+            
             modified_heights.append(new_height)
     #---------------------CODE TO ALTER THE ELEVATION MAP------------------------#
 
