@@ -12,6 +12,7 @@ class MooseGreedySupervisor(Supervisor):
         self.timestep = int(self.getBasicTimeStep())
         self.robot = self.getFromDef("MOOSEROBOT")
 
+        # Motores
         self.left_motors = [self.getDevice(f"left_motor_{i}") for i in range(1, 5)]
         self.right_motors = [self.getDevice(f"right_motor_{i}") for i in range(1, 5)]
 
@@ -19,7 +20,7 @@ class MooseGreedySupervisor(Supervisor):
             motor.setPosition(float('inf'))
             motor.setVelocity(0.0)
 
-        # sensores
+        # Sensores
         self.gps = self.getDevice("gps")
         self.gps.enable(self.timestep)
         self.imu = self.getDevice("inertial unit")
@@ -36,11 +37,10 @@ class MooseGreedySupervisor(Supervisor):
 
     def height_at(self, x, y):
         index = y * self.x_dim + x
-        print(f"Altura para (x={x}, y={y}), índice {index}")
         return self.height_values[index]
 
     def heuristic(self, a, b):
-        print(f"Cálculo da heurística entre {a} e {b}")
+        print(f"Heurística entre {a} e {b}")
         return math.hypot(b[0] - a[0], b[1] - a[1])
 
     def neighbors(self, x, y):
@@ -122,6 +122,7 @@ class MooseGreedySupervisor(Supervisor):
                 break
 
             desired_angle = math.atan2(dy, dx)
+            # retorna [roll, pitch, yaw]. direção do robo
             yaw = self.imu.getRollPitchYaw()[2]
             beta = desired_angle - yaw
             beta = (beta + math.pi) % (2 * math.pi) - math.pi
@@ -145,6 +146,7 @@ class MooseGreedySupervisor(Supervisor):
             target = self.grid_to_world(x, y)
             print(f"Mover para: {target}")
             self.go_to(target)
+            self.wait_until_still()
 
             if self.step(self.timestep) == -1:
                 return
@@ -155,13 +157,14 @@ class MooseGreedySupervisor(Supervisor):
             distance = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(2)))
             total_distance += distance
 
+        self.set_wheel_speeds(0.0, 0.0)
+
         end_time = time.time()
         duration = end_time - start_time
         avg_speed = total_distance / duration
 
         print(f"Execução concluída. Distância: {total_distance:.2f}, Tempo: {duration:.2f}")
 
-##def função para salvar dados da execução
 
     def wait_until_still(self, duration=1.0):
         stable_time = 0.0
@@ -193,11 +196,11 @@ class MooseGreedySupervisor(Supervisor):
             return
 
         self.wait_until_still()
-        print(f"Caminho encontrado com {len(path)} passos")
+        print(f"Caminho com {len(path)} passos")
         self.move_robot(path)
         print("Greedy terminado com sucesso")
 
 
 if __name__ == "__main__":
-    print("A iniciar execução")
+    print("A iniciar a execução")
     MooseGreedySupervisor().run()
