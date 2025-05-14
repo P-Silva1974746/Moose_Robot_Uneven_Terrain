@@ -194,22 +194,27 @@ class MooseSupervisor(Supervisor):
         self.battery_energy = max(0, min(self.battery_energy - consumption + recovery, self.battery_max_energy))
 
     def set_wheel_speeds(self, left_speed, right_speed):
+        #print(f"Left motor speed: {left_speed}")
+        #print(f"Right motor speed: {right_speed}")
+
         for motor in self.left_motors:
             motor.setVelocity(left_speed)
         for motor in self.right_motors:
             motor.setVelocity(right_speed)
 
-    def go_to(self, target, tolerance=0.3):
-        MAX_SPEED = 6.28  # Velocidade máxima do robô
+    def go_to(self, target, d_tolerance=0.3):
+        ang_tolerance=0.05 # se o robot estiver alinhado o sufeciente pode andar mais rapido
 
         while self.step(self.timestep) != -1:
+            MAX_SPEED = 6.28  # Velocidade máxima do robô
             pos = self.gps.getValues()
             dx = target[0] - pos[0]
             dy = target[1] - pos[1]
             distance = math.hypot(dx, dy)
 
-            if distance < tolerance:
+            if distance < d_tolerance:
                 self.set_wheel_speeds(0.0, 0.0)
+                print("Robot got to {}".format(target))
                 return True
 
             desired_angle = math.atan2(dy, dx)
@@ -217,9 +222,21 @@ class MooseSupervisor(Supervisor):
             beta = desired_angle - yaw
             beta = (beta + math.pi) % (2 * math.pi) - math.pi
 
-            correction = 2.0 * beta
-            left_speed = MAX_SPEED - correction
-            right_speed = MAX_SPEED + correction
+            # nova velociade maxima dependendo do quao alinhado o robot esta com o proximo target do path
+            if(abs(beta) < ang_tolerance):
+                #MAX_SPEED*=1
+                forward_speed=MAX_SPEED
+                correction = 2.0 * beta
+                left_speed = forward_speed - correction
+                right_speed = forward_speed + correction
+
+            else:
+                #MAX_SPEED*=0.2
+                turn_speed=3*beta
+                left_speed=-turn_speed
+                right_speed=turn_speed
+
+
 
             left_speed = max(-MAX_SPEED, min(MAX_SPEED, left_speed))
             right_speed = max(-MAX_SPEED, min(MAX_SPEED, right_speed))
