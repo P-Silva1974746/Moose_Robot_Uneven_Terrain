@@ -21,9 +21,9 @@ class MooseGreedySupervisor(Supervisor):
             motor.setVelocity(0.0)
 
         # Sensores
-        self.gps = self.getDevice("gps")
+        self.gps = self.getDevice("gps") #posição do robo
         self.gps.enable(self.timestep)
-        self.imu = self.getDevice("inertial unit")
+        self.imu = self.getDevice("inertial unit") #orientação do robo
         self.imu.enable(self.timestep)
 
         # Mapa de elevação (grid)
@@ -107,9 +107,10 @@ class MooseGreedySupervisor(Supervisor):
 
 
     def go_to(self, target, tolerance=0.3):
-        MAX_SPEED = min(m.getMaxVelocity() for m in self.left_motors + self.right_motors)
-        print("Max vel.:", MAX_SPEED)
+        #MAX_SPEED = min(m.getMaxVelocity() for m in self.left_motors + self.right_motors)
+        MAX_SPEED = 6.28
         TURN_COEFF = 2.0
+        ang_tolerance = 0.2
 
         while self.step(self.timestep) != -1:
             pos = self.gps.getValues()
@@ -119,7 +120,8 @@ class MooseGreedySupervisor(Supervisor):
 
             if distance < tolerance:
                 self.set_wheel_speeds(0.0, 0.0)
-                break
+                #break
+                return True
 
             desired_angle = math.atan2(dy, dx)
             # retorna [roll, pitch, yaw]. direção do robo
@@ -127,43 +129,19 @@ class MooseGreedySupervisor(Supervisor):
             beta = desired_angle - yaw
             beta = (beta + math.pi) % (2 * math.pi) - math.pi
 
-            correction = TURN_COEFF * beta
-            left_speed = MAX_SPEED - correction
-            right_speed = MAX_SPEED + correction
+            if abs(beta) < ang_tolerance:
+                correction = TURN_COEFF * beta            #
+                left_speed = MAX_SPEED - correction       #
+                right_speed = MAX_SPEED + correction      #
+
+            else:
+                turn_speed = 3.0 * beta
+                left_speed = -turn_speed
+                right_speed = turn_speed
 
             self.set_wheel_speeds(
                 max(-MAX_SPEED, min(MAX_SPEED, left_speed)),
                 max(-MAX_SPEED, min(MAX_SPEED, right_speed)))
-
-
-    def move_robot(self, path):
-        print("A mover o robo...")
-        total_distance = 0 #metros
-        start_time = time.time() #segundos
-        last_pos = self.grid_to_world(*path[0])
-
-        for x, y in path:
-            target = self.grid_to_world(x, y)
-            print(f"Mover para: {target}")
-            self.go_to(target)
-            self.wait_until_still()
-
-            if self.step(self.timestep) == -1:
-                return
-
-            current_pos = self.gps.getValues()
-            print(f"Posição atual: {current_pos}")
-
-            distance = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(2)))
-            total_distance += distance
-
-        self.set_wheel_speeds(0.0, 0.0)
-
-        end_time = time.time()
-        duration = end_time - start_time
-        avg_speed = total_distance / duration
-
-        print(f"Execução concluída. Distância: {total_distance:.2f}, Tempo: {duration:.2f}")
 
 
     def wait_until_still(self, duration=1.0):
@@ -181,10 +159,48 @@ class MooseGreedySupervisor(Supervisor):
             else:
                 stable_time = 0.0
 
+
+    def move_robot(self, path):
+        print("A mover o robo...")
+        total_distance = 0 #metros
+        start_time = time.time() #segundos
+        last_pos = self.grid_to_world(*path[0])
+
+        for x, y in path:
+            target = self.grid_to_world(x, y)
+            print(f"Mover para: {target}")
+            self.go_to(target)
+            #self.wait_until_still()
+
+            if self.step(self.timestep) == -1:
+                return
+
+            current_pos = self.gps.getValues()
+            #print(f"Posição atual: {current_pos}")
+
+            distance = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(2)))
+            total_distance += distance
+
+        self.set_wheel_speeds(0.0, 0.0) #parar
+
+        end_time = time.time()
+        duration = end_time - start_time
+        avg_speed = total_distance / duration
+
+        print(f"Execução concluída. Distância: {total_distance:.2f}, Tempo: {duration:.2f}")
+
+
+
     def run(self):
         start, goal = self.generate_random_points()
         print(f"Ponto A: {start}")
         print(f"Ponto B: {goal}")
+
+        #robo para o ponto A
+        start_pos = self.grid_to_world(*start)
+        self.robot.getField("translation").setSFVec3f(start_pos)
+        self.wait_until_still()
+
 
         print(f"A iniciar execução")
         path = self.greedy_search(start, goal)
