@@ -1,3 +1,7 @@
 .venv
 .idea
 .png
+# Ignorar ficheiros temporários e de build
+__pycache__/
+*.pyc
+*.pyo

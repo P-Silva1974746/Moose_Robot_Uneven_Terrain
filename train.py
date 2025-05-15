@@ -11,7 +11,7 @@ os.makedirs(save_dir, exist_ok=True)
 
 if os.path.exists(model_path + ".zip"):
     print("Modelo existente encontrado. A carregar e continuar treino...")
-    model = A2C.load(model_path, env=env)
+    model = A2C.load(model_path, env=env, reset_timesteps=False)
 else:
     print("Nenhum modelo encontrado. A iniciar treino de novo...")
     model = A2C("MlpPolicy", env, verbose=1, tensorboard_log="./a2c_moose/")
