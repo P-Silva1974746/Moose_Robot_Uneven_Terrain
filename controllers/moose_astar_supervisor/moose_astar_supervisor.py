@@ -86,7 +86,7 @@ class MooseSupervisor(Supervisor):
     def set_robot_position(self, x, y, yaw=0.0):
         z = self.height_at(x, y)
         pos_field = self.robot.getField("translation")
-        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])  # Ajuste do z + altura segura
+        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 3])  # Ajuste do z + altura segura
 
         rot_field = self.robot.getField("rotation")
         # Roda em torno do eixo Y ([0, 1, 0]) com ângulo `yaw` (em radianos)
@@ -203,7 +203,9 @@ class MooseSupervisor(Supervisor):
             motor.setVelocity(right_speed)
 
     def go_to(self, target, d_tolerance=0.3):
-        ang_tolerance=0.05 # se o robot estiver alinhado o sufeciente pode andar mais rapido
+        ang_tolerance=0.25 # se o robot estiver alinhado o sufeciente pode andar mais rapido
+        turning=False
+        going_forward=False
 
         while self.step(self.timestep) != -1:
             MAX_SPEED = 6.28  # Velocidade máxima do robô
@@ -213,7 +215,7 @@ class MooseSupervisor(Supervisor):
             distance = math.hypot(dx, dy)
 
             if distance < d_tolerance:
-                self.set_wheel_speeds(0.0, 0.0)
+                #self.set_wheel_speeds(0.0, 0.0)
                 print("Robot got to {}".format(target))
                 return True
 
@@ -230,11 +232,22 @@ class MooseSupervisor(Supervisor):
                 left_speed = forward_speed - correction
                 right_speed = forward_speed + correction
 
+                if not going_forward:
+                    print(f"Velocidade na reta: {forward_speed}")
+                going_forward = True
+                turning = False
+            # turning
             else:
                 #MAX_SPEED*=0.2
-                turn_speed=3*beta
+                turn_speed=5*beta
                 left_speed=-turn_speed
                 right_speed=turn_speed
+
+                if not turning:
+                    print(f"Velocidade na curva: {turn_speed}")
+                going_forward = False
+                turning = True
+
 
 
 
@@ -326,8 +339,8 @@ class MooseSupervisor(Supervisor):
                 stable_time = 0.0  # Reinicia o tempo de estabilidade se houver movimento
 
     def run(self):
-        start = (random.randint(0, self.x_dim - 1), random.randint(0, self.y_dim - 1))
-        goal = (random.randint(0, self.x_dim - 1), random.randint(0, self.y_dim - 1))
+        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
+        goal = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
 
         print(f"Iniciando execução... Posição inicial: {start}, Meta: {goal}")
         self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
