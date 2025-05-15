@@ -32,9 +32,9 @@ if match:
     # 200 is the size of our elevation grid this could be done with code if we read it from the .wbt file directly
     for j in range (200):
         for i in range (200):
-            new_height= perlin_noise((i+random.random())*noise_scale,(j+random.random())*noise_scale)*20
+            new_height= perlin_noise((i+random.random())*noise_scale,(j+random.random())*noise_scale)*13
             #new_height=0
-            
+
             modified_heights.append(new_height)
     #---------------------CODE TO ALTER THE ELEVATION MAP------------------------#
 
