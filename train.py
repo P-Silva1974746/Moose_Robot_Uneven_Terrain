@@ -16,7 +16,7 @@ else:
     print("Nenhum modelo encontrado. A iniciar treino de novo...")
     model = A2C("MlpPolicy", env, verbose=1, tensorboard_log="./a2c_moose/")
 
-model.learn(total_timesteps=100000)
+model.learn(total_timesteps=100000, tb_log_name="A2C")
 
 model.save(model_path)
 print("Modelo guardado com sucesso.")
