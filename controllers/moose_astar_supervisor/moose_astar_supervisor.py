@@ -208,7 +208,8 @@ class MooseSupervisor(Supervisor):
         going_forward=False
 
         while self.step(self.timestep) != -1:
-            MAX_SPEED = 6.28  # Velocidade máxima do robô
+            MAX_SPEED = 26  # Velocidade máxima do robô
+            turned=False
             pos = self.gps.getValues()
             dx = target[0] - pos[0]
             dy = target[1] - pos[1]
@@ -225,7 +226,7 @@ class MooseSupervisor(Supervisor):
             beta = (beta + math.pi) % (2 * math.pi) - math.pi
 
             # nova velociade maxima dependendo do quao alinhado o robot esta com o proximo target do path
-            if(abs(beta) < ang_tolerance):
+            if(abs(beta) < ang_tolerance or turned):
                 #MAX_SPEED*=1
                 forward_speed=MAX_SPEED
                 correction = 2.0 * beta
@@ -242,11 +243,7 @@ class MooseSupervisor(Supervisor):
                 turn_speed=5*beta
                 left_speed=-turn_speed
                 right_speed=turn_speed
-
-                if not turning:
-                    print(f"Velocidade na curva: {turn_speed}")
-                going_forward = False
-                turning = True
+                turned = True
 
 
 
