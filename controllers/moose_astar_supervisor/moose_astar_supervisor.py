@@ -5,6 +5,8 @@ import time
 import csv
 import matplotlib.pyplot as plt
 import os
+
+import numpy as np
 from scipy.ndimage import gaussian_filter
 from controller import Supervisor
 
@@ -83,14 +85,47 @@ class MooseSupervisor(Supervisor):
         ]
         return elevation_map
 
-    def set_robot_position(self, x, y, yaw=0.0):
+    def get_slope_value(self, x, y, scale=10):
+        """This function gives us the gradient of the region of scale//2 around the point (x,y)"""
+        heights_in_range=np.zeros((scale, scale))
+        for i in range(scale):
+            for j in range(scale):
+                nx=x-scale//2+i
+                ny=y-scale//2+j
+                heights_in_range[i,j]=self.height_at(nx,ny)
+
+        dz_x, dz_y = np.gradient(heights_in_range)
+        slope_x= dz_x[scale//2,scale//2]
+        slope_y= dz_y[scale//2,scale//2]
+
+        slope_magnitude=np.hypot(slope_x**2,slope_y**2)
+
+        normal=np.array([-slope_x, -slope_y, 1.0])
+        normal/=np.linalg.norm(normal)
+
+        return slope_magnitude, normal
+
+
+
+
+    def set_robot_position(self, x, y):
         z = self.height_at(x, y)
         pos_field = self.robot.getField("translation")
-        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 3])  # Ajuste do z + altura segura
+        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 1.5])  # Ajuste do z + altura segura
+
+        # calcula o gradiente do terrono em volta e retorna o vetor normal
+        _, normal = self.get_slope_value(x, y)
+        # direcao que queremos alinhar com o vetor normal e o eixo z do robot
+        up=np.array([0, 0, 1], dtype=float)
+        # calcular os eixos em que a rotacao vao ter de acontecer para alinhar o eixo z do robot com o vetor normal
+        axis=np.cross(up, normal)
+        axis/=np.linalg.norm(axis)
+
+        # calcular o angulo entre o up e o vetor normal
+        angle=np.arccos(np.clip(np.dot(up,normal), -1.0, 1.0))
 
         rot_field = self.robot.getField("rotation")
-        # Roda em torno do eixo Y ([0, 1, 0]) com ângulo `yaw` (em radianos)
-        rot_field.setSFRotation([0, 1, 0, yaw])
+        rot_field.setSFRotation([axis[0], axis[1], axis[2], angle])
 
         self.step(self.timestep)
 
