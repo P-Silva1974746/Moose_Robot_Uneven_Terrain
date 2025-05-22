@@ -105,16 +105,29 @@ class MooseSupervisor(Supervisor):
 
         return slope_magnitude, normal
 
+    def is_flat(self,x,y):
+        _, normal=self.get_slope_value(x,y, scale=20)
+        up=np.array([0,0,1], dtype=float)
+
+        # get axis of rotation
+        axis=np.cross(up,normal)
+
+        # if it is small enough we are in a flat surface
+        if np.linalg.norm(axis)<1e-2:
+            return True
+        else:
+            return False
+
 
 
 
     def set_robot_position(self, x, y):
         z = self.height_at(x, y)
         pos_field = self.robot.getField("translation")
-        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 1.5])  # Ajuste do z + altura segura
+        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])  # Ajuste do z + altura segura
 
         # calcula o gradiente do terrono em volta e retorna o vetor normal
-        _, normal = self.get_slope_value(x, y)
+        _, normal = self.get_slope_value(x, y, scale=15)
         # direcao que queremos alinhar com o vetor normal e o eixo z do robot
         up=np.array([0, 0, 1], dtype=float)
         # calcular os eixos em que a rotacao vao ter de acontecer para alinhar o eixo z do robot com o vetor normal
@@ -371,7 +384,10 @@ class MooseSupervisor(Supervisor):
                 stable_time = 0.0  # Reinicia o tempo de estabilidade se houver movimento
 
     def run(self):
-        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
+        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
+        while not self.is_flat(x=start[0], y=start[1]):
+            start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
+            print("Is not Flat")
         goal = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
 
         print(f"Iniciando execução... Posição inicial: {start}, Meta: {goal}")
