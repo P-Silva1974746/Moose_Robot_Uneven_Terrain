@@ -14,7 +14,7 @@ if os.path.exists(model_path + ".zip"):
     model = A2C.load(model_path, env=env, reset_timesteps=False)
 else:
     print("Nenhum modelo encontrado. A iniciar treino de novo...")
-    model = A2C("MlpPolicy", env, verbose=1, tensorboard_log="./a2c_moose/")
+    model = A2C("MlpPolicy", env, verbose=1, learning_rate=0.0001, tensorboard_log="./a2c_moose/")
 
 model.learn(total_timesteps=100000, tb_log_name="A2C")
 

@@ -2,6 +2,8 @@ from controller import Robot, Motor, GPS, InertialUnit
 import socket
 import pickle
 import math
+import random  # para gerar objetivo aleatório
+#futuramente quando adicionar função de mudar mapas, se durante 10 tentativas nos primeiros 10 segindos ficar com problemas de não pousar corretamnet mudar mundo
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
@@ -9,6 +11,7 @@ timestep = int(robot.getBasicTimeStep())
 left_motors = [robot.getDevice(f"left_motor_{i}") for i in range(1, 5)]
 right_motors = [robot.getDevice(f"right_motor_{i}") for i in range(1, 5)]
 
+# mudar para lidar e ver as ações com base nisso
 gps = robot.getDevice("gps")
 gps.enable(timestep)
 imu = robot.getDevice("inertial unit")
@@ -25,9 +28,16 @@ server.listen(1)
 conn, _ = server.accept()
 
 # parâmetros
-goal = [5.0, 0.0, 5.0]
+grid_min = -25
+grid_max = 25
+
+goal_x = random.randint(0, 49)  # 50 células no X
+goal_y = random.randint(0, 49)  # 50 células no Y
+
+# O +0.5 centra o ponto no meio da célula
+goal = [grid_min + goal_x + 0.5, grid_min + goal_y + 0.5, 0.0]  # Altura Z definida separadamente
 d_g = 0.5
-mu = 1.0
+mu = 0.05
 stuck_counter = 0
 max_stuck_steps = 20
 
@@ -45,6 +55,10 @@ while robot.step(timestep) != -1:
         if data["cmd"] == "step":
             total_steps += 1
             current_time = robot.getTime()
+            if current_time - start_time > 120:
+                reward = -0.5
+                done = True
+
             delta_t = current_time - last_time
             last_time = current_time
 
@@ -94,6 +108,11 @@ while robot.step(timestep) != -1:
 
         elif data["cmd"] == "reset":
             # Reset do estado
+            goal = [
+                random.uniform(0.0, 10.0),  # x aleatório
+                0.0,
+                random.uniform(0.0, 10.0)  # z aleatório
+            ]
             start_pos = gps.getValues()
             min_dist = float("inf")
             stuck_counter = 0
