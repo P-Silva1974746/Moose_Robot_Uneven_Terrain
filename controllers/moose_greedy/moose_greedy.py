@@ -1,222 +1,302 @@
-import heapq
 import math
 import random
-import time
-from controller import Supervisor
+import numpy as np
+from controller import Supervisor, InertialUnit
 
-class MooseGreedySupervisor(Supervisor):
+class MooseNavigator:
     def __init__(self):
-        super().__init__()
+        self.robot = Supervisor()
+        # super().__init__()
+        '''
+        self.robot = Supervisor()
+        self.timestep = int(self.robot.getBasicTimeStep())
 
-        # Setup
-        self.timestep = int(self.getBasicTimeStep())
-        self.robot = self.getFromDef("MOOSEROBOT")
+        # Get robot node and fields (for random positioning)
+        self.robot_node = self.robot.getFromDef("MOOSEROBOT")
+        self.translation_field = self.robot_node.getField("translation")
 
         # Motores
-        self.left_motors = [self.getDevice(f"left_motor_{i}") for i in range(1, 5)]
-        self.right_motors = [self.getDevice(f"right_motor_{i}") for i in range(1, 5)]
+        self.left_motors = [self.robot.getDevice(f"left_motor_{i}") for i in range(1, 5)]
+        self.right_motors = [self.robot.getDevice(f"right_motor_{i}") for i in range(1, 5)]
+
+        for motor in self.left_motors + self.right_motors:
+            motor.setPosition(float('inf'))
+            motor.setVelocity(0.0)
+
+
+        self.gps = self.robot.getDevice("gps")
+        self.gps.enable(self.timestep)
+
+        self.imu = self.robot.getDevice("inertial unit")
+        self.imu.enable(self.timestep)
+'''
+
+        # Setup
+        self.timestep = int(self.robot.getBasicTimeStep())
+        self.robot_node = self.robot.getFromDef("MOOSEROBOT")
+        if self.robot_node is None:
+            print("ERROR: Could not find robot node with DEF 'MOOSEROBOT'")
+        self.translation_field = self.robot_node.getField("translation")
+
+        # Motores
+        self.left_motors = [self.robot.getDevice(f"left_motor_{i}") for i in range(1, 5)]
+        self.right_motors = [self.robot.getDevice(f"right_motor_{i}") for i in range(1, 5)]
 
         for motor in self.left_motors + self.right_motors:
             motor.setPosition(float('inf'))
             motor.setVelocity(0.0)
 
         # Sensores
-        self.gps = self.getDevice("gps") #posição do robo
+        self.gps = self.robot.getDevice("gps")  # posição do robo
         self.gps.enable(self.timestep)
-        self.imu = self.getDevice("inertial unit") #orientação do robo
+        self.imu = self.robot.getDevice("inertial unit")  # orientação do robo
         self.imu.enable(self.timestep)
 
-        # Mapa de elevação (grid)
-        self.elevation_grid = self.getFromDef("EG")
+        # Mapa (grid)
+        self.elevation_grid = self.robot.getFromDef("EG")
         self.height_field = self.elevation_grid.getField("height")
         self.height_values = [self.height_field.getMFFloat(i) for i in range(self.height_field.getCount())]
         self.x_dim = self.elevation_grid.getField("xDimension").getSFInt32()
         self.y_dim = self.elevation_grid.getField("yDimension").getSFInt32()
+        self.z_dim = self.elevation_grid.getField("yDimension").getSFInt32()
         self.x_spacing = self.elevation_grid.getField("xSpacing").getSFFloat()
         self.y_spacing = self.elevation_grid.getField("ySpacing").getSFFloat()
+        self.z_spacing = self.elevation_grid.getField("ySpacing").getSFFloat()
 
+        self.max_speed = 6.28
+
+        self.randomize_positions2()
+
+    def set_motor_velocity(self, left_speed, right_speed):
+        for m in self.left_motors:
+            m.setVelocity(left_speed)
+        for m in self.right_motors:
+            m.setVelocity(right_speed)
+
+    def get_terrain_height(self, x, y):
+        # Convert world coords (x,y) to grid indices (ix, iy)
+        ix = int(x / self.x_spacing)
+        iy = int(y / self.y_spacing)
+
+        # Clamp indices to valid range
+        ix = max(0, min(self.x_dim - 1, ix))
+        iy = max(0, min(self.y_dim - 1, iy))
+
+        # Height field is a 1D list, row-major order
+        idx = iy * self.x_dim + ix
+
+        # Get height value
+        return self.height_values[idx]
+
+    '''
     def height_at(self, x, y):
-        index = y * self.x_dim + x
-        return self.height_values[index]
-
-    def heuristic(self, a, b):
-        print(f"Heurística entre {a} e {b}")
-        return math.hypot(b[0] - a[0], b[1] - a[1])
-
-    def neighbors(self, x, y):
-        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        valid = []
-        for dx, dy in dirs:
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < self.x_dim and 0 <= ny < self.y_dim:
-                valid.append((nx, ny))
-        return valid
-
-    def greedy_search(self, start, goal):
-        print(f"Greedy search de {start} para {goal}")
-        open_set = []
-        heapq.heappush(open_set, (self.heuristic(start, goal), start))
-        came_from = {start: None}
-        visited = set()
-
-        while open_set:
-            _, current = heapq.heappop(open_set)
-            if current == goal:
-                break
-
-            if current in visited:
-                continue
-            visited.add(current)
-
-            for neighbor in self.neighbors(*current):
-                if neighbor not in visited:
-                    came_from[neighbor] = current
-                    heapq.heappush(open_set, (self.heuristic(neighbor, goal), neighbor))
-
-        # Reconstruir caminho
-        path = []
-        node = goal
-        while node:
-            path.append(node)
-            node = came_from.get(node)
-        path.reverse()
-        return path
-
-    def grid_to_world(self, x, y):
+        x = int(x)
+        y = int(y)
         x = max(0, min(x, self.x_dim - 1))
         y = max(0, min(y, self.y_dim - 1))
-        wx = x * self.x_spacing
-        wy = y * self.y_spacing
-        wz = self.height_at(x, y) + 0.5
-        return [wx, wy, wz]
+        index = y * self.x_dim + x
+        return self.height_values[index]
+    '''
+    def get_slope_value(self, x, y, scale=10):
+        """
+        Computes the slope magnitude and surface normal at a grid position (x, y).
+        - `x`, `y`: grid coordinates (integers).
+        - `scale`: size of the local area to calculate gradient from (must be odd).
+        Returns:
+        - slope_magnitude: float
+        - normal: np.array([x, y, z])
+        """
+        half_scale = scale // 2
+        heights = np.zeros((scale, scale))
+
+        for i in range(scale):
+            for j in range(scale):
+                nx = x - half_scale + i
+                ny = y - half_scale + j
+                #heights[i, j] = self.height_at(nx, ny)
+                heights[i, j] = self.get_terrain_height(nx, ny)
+
+        dz_dx, dz_dy = np.gradient(heights, self.x_spacing, self.y_spacing)
+        slope_x = dz_dx[half_scale, half_scale]
+        slope_y = dz_dy[half_scale, half_scale]
+
+        slope_magnitude = np.hypot(slope_x, slope_y)
+
+        # Create terrain surface normal vector
+        normal = np.array([-slope_x, -slope_y, 1.0])
+        normal /= np.linalg.norm(normal)
+
+        return slope_magnitude, normal
 
 
-    def generate_random_points(self, min_distance=5):
-        while True:
-            start = (random.randint(0, self.x_dim - 1), random.randint(0, self.y_dim - 1))
-            goal = (random.randint(0, self.x_dim - 1), random.randint(0, self.y_dim - 1))
-            if self.heuristic(start, goal) >= min_distance:
-                return start, goal
+
+    def randomize_positions2(self):
+        x_max = self.x_dim * self.x_spacing
+        y_max = self.y_dim * self.y_spacing
+        z_max = self.z_dim * self.z_spacing
+        self.bounds = {'x': (0.0, x_max), 'y': (0.0, y_max), 'z': (0.0, z_max)}
+
+        for attempt in range(100):
+            start_x = random.uniform(*self.bounds['x'])
+            start_y = random.uniform(*self.bounds['y'])
+
+            # Convert to height field grid indices
+            grid_x = int(start_x / self.x_spacing)
+            grid_y = int(start_y / self.y_spacing)
+
+            slope, _ = self.get_slope_value(grid_x, grid_y, scale=10)
+
+            if slope <= 0.1:
+                start_z = self.get_terrain_height(start_x, start_y) +0.8
+                self.translation_field.setSFVec3f([start_x, start_y, start_z])
+                print(f"Found safe start {attempt}: ({start_x:.2f}, {start_y:.2f}, {start_z:.2f}), slope: {slope:.3f}")
+                break
+        else:
+            print("Failed to find safe starting point. Using last random position.")
+            start_z = self.get_terrain_height(start_x, start_y) +0.8
+            self.translation_field.setSFVec3f([start_x, start_y, start_z])
+
+        self.robot.step(self.timestep)
+
+        # Set goal position (no slope check, but you can add it similarly if needed)
+        goal_x = random.uniform(*self.bounds['x'])
+        goal_y = random.uniform(*self.bounds['y'])
+        goal_z = self.get_terrain_height(goal_x, goal_y) +0.8
+        self.goal = [goal_x, goal_y, goal_z]
+
+        print(f"Goal position: ({self.goal[0]:.2f}, {self.goal[1]:.2f}, {self.goal[2]:.2f})")
 
 
-    def set_wheel_speeds(self, left_speed, right_speed):
-        for motor in self.left_motors:
-            motor.setVelocity(left_speed)
-        for motor in self.right_motors:
-            motor.setVelocity(right_speed)
+
+    def randomize_positions(self):
+        x_max = self.x_dim * self.x_spacing
+        y_max = self.y_dim * self.y_spacing
+        z_max = self.z_dim * self.z_spacing
+        self.bounds = {'x': (0.0, x_max), 'y': (0.0, y_max), 'z': (0.0, z_max)}
+
+        start_x = random.uniform(*self.bounds['x'])
+        start_y = random.uniform(*self.bounds['y'])
+        print(f"Terreno x,y {self.get_terrain_height(start_x, start_y)}")
+        start_z = self.get_terrain_height(start_x, start_y) + 0.05  # small offset above ground
+        self.translation_field.setSFVec3f([start_x, start_y, start_z])
+        print(f"Robot Z {start_z}")
+        print(f"Starting position: ({start_x:.2f}, {start_y:.2f}, {start_z:.2f})")
+
+        self.robot.step(self.timestep)
+
+        self.goal = [
+            random.uniform(*self.bounds['x']),
+            random.uniform(*self.bounds['y']),
+            0.0]
+
+        self.goal[2] = self.get_terrain_height(self.goal[0], self.goal[1]) + 0.05
+
+        print(f"Goal position:  ({self.goal[0]:.2f}, {self.goal[1]:.2f}, {self.goal[2]:.2f})")
 
 
-    def go_to(self, target, tolerance=0.3):
-        #MAX_SPEED = min(m.getMaxVelocity() for m in self.left_motors + self.right_motors)
-        MAX_SPEED = 6.28
-        TURN_COEFF = 2.0
-        ang_tolerance = 0.2
+    def distance_to_goal(self, pos):
+        dx = self.goal[0] - pos[0]
+        dy = self.goal[1] - pos[1]
+        return math.sqrt(dx**2 + dy**2)
 
-        while self.step(self.timestep) != -1:
-            pos = self.gps.getValues()
-            dx = target[0] - pos[0]
-            dy = target[1] - pos[1]
-            distance = math.hypot(dx, dy)
+    def angle_to_goal(self, pos):
+        dx = self.goal[0] - pos[0]
+        dy = self.goal[1] - pos[1]
+        return math.atan2(dy, dx)  # Note: atan2(dx, dy) -> facing +Z
 
-            if distance < tolerance:
-                self.set_wheel_speeds(0.0, 0.0)
-                #break
-                return True
-
-            desired_angle = math.atan2(dy, dx)
-            # retorna [roll, pitch, yaw]. direção do robo
-            yaw = self.imu.getRollPitchYaw()[2]
-            beta = desired_angle - yaw
-            beta = (beta + math.pi) % (2 * math.pi) - math.pi
-
-            if abs(beta) < ang_tolerance:
-                correction = TURN_COEFF * beta            #
-                left_speed = MAX_SPEED - correction       #
-                right_speed = MAX_SPEED + correction      #
-
-            else:
-                turn_speed = 3.0 * beta
-                left_speed = -turn_speed
-                right_speed = turn_speed
-
-            self.set_wheel_speeds(
-                max(-MAX_SPEED, min(MAX_SPEED, left_speed)),
-                max(-MAX_SPEED, min(MAX_SPEED, right_speed)))
+    def get_heading(self):
+        # Yaw from IMU (orientation)
+        roll, pitch, yaw = self.imu.getRollPitchYaw()
+        return yaw  # In radians
 
 
-    def wait_until_still(self, duration=1.0):
-        stable_time = 0.0
-        last_pos = self.gps.getValues()
-        while stable_time < duration:
-            if self.step(self.timestep) == -1:
-                return
-            current_pos = self.gps.getValues()
-            movement = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(3)))
-            last_pos = current_pos
 
-            if movement < 0.001:
-                stable_time += self.timestep / 1000.0
-            else:
-                stable_time = 0.0
+    def back_up(self, duration_steps=10):
+        self.set_motor_velocity(-2.0, -2.0)
+        for _ in range(duration_steps):
+            if self.robot.step(self.timestep) == -1:
+                break
 
-
-    def move_robot(self, path):
-        print("A mover o robo...")
-        total_distance = 0 #metros
-        start_time = time.time() #segundos
-        last_pos = self.grid_to_world(*path[0])
-
-        for x, y in path:
-            target = self.grid_to_world(x, y)
-            print(f"Mover para: {target}")
-            self.go_to(target)
-            #self.wait_until_still()
-
-            if self.step(self.timestep) == -1:
-                return
-
-            current_pos = self.gps.getValues()
-            #print(f"Posição atual: {current_pos}")
-
-            distance = math.sqrt(sum((current_pos[i] - last_pos[i]) ** 2 for i in range(2)))
-            total_distance += distance
-
-        self.set_wheel_speeds(0.0, 0.0) #parar
-
-        end_time = time.time()
-        duration = end_time - start_time
-        avg_speed = total_distance / duration
-
-        print(f"Execução concluída. Distância: {total_distance:.2f}, Tempo: {duration:.2f}")
-
+    def rotate_safely(self, direction, duration_steps=10):
+        # direction: -1 for left, +1 for right
+        self.set_motor_velocity(direction, -direction)
+        for _ in range(duration_steps):
+            if self.robot.step(self.timestep) == -1:
+                break
 
 
     def run(self):
-        start, goal = self.generate_random_points()
-        print(f"Ponto A: {start}")
-        print(f"Ponto B: {goal}")
+        contador = 0
+        while self.robot.step(self.timestep) != -1:
+            contador+=1
+            pos = self.gps.getValues()
+            heading = self.get_heading()
+            distance = self.distance_to_goal(pos)
 
-        #robo para o ponto A
-        start_pos = self.grid_to_world(*start)
-        self.robot.getField("translation").setSFVec3f(start_pos)
-        self.wait_until_still()
+            if contador == 500:
+                print(f"({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f}), {self.get_terrain_height(pos[0], pos[1]):.2f}")
+                contador = 0
 
+            if distance < 0.2:
+                print("[SUCCESS] Reached goal")
+                self.set_motor_velocity(0, 0)
+                #self.left_motor.setVelocity(0)
+                #self.right_motor.setVelocity(0)
+                break
 
-        print(f"A iniciar execução")
-        path = self.greedy_search(start, goal)
-        print(f"Caminho: {path}")
+            desired_angle = self.angle_to_goal(pos)
+            angle_diff = desired_angle - heading
+            angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
 
+            #if contador == 300:
+             #   print(f"Pos: ({pos[0]:.2f}, {pos[1]:.2f}), Goal: ({self.goal[0]:.2f}, {self.goal[1]:.2f})")
+              #  print(f"Heading: {math.degrees(heading):.1f}°, Goal angle: {math.degrees(desired_angle):.1f}°, Angle diff: {math.degrees(angle_diff):.1f}°")
+               # contador = 0
 
-        if len(path) < 2:
-            print("Caminho não encontrado")
-            return
+            # Control logic
+            if abs(angle_diff) > 0.01745: #rad correspondente a 1º
+                # Turn in place
+                turn_speed = 1.0 if angle_diff > 0 else -1.0
 
-        self.wait_until_still()
-        print(f"Caminho com {len(path)} passos")
-        self.move_robot(path)
-        print("Greedy terminado com sucesso")
+                self.set_motor_velocity(-turn_speed, turn_speed)
+                #print(f"Rodar: {turn_speed}")
+                #self.left_motor.setVelocity(turn_speed)
+                #self.right_motor.setVelocity(-turn_speed)
+            else:
+                # Move forward
+                self.set_motor_velocity(25.0, 25.0)
+                #print(f"Andar")
+                #self.left_motor.setVelocity(3.0)
+                #self.right_motor.setVelocity(3.0)
 
+            # Pitch is the up/down tilt of a robot's body
+            # Roll is the measure of how much the robot tilts side to side (left or right)
+            pitch_threshold = 0.25
+            roll_threshold = 0.25
+            pitch, roll, _ = self.imu.getRollPitchYaw()
+            if abs(pitch) > pitch_threshold or abs(roll) > roll_threshold:
+              #  print("[INFO] Reversing due to instability")
+                self.set_motor_velocity(0, 0)
+                self.robot.step(self.timestep * 2)
+                #self.set_motor_velocity(-2.0, -2.0)
+                #self.robot.step(self.timestep * 10)
+                self.back_up()
+
+                # Decide safest rotation direction
+                if roll > 0:
+                    # Tilted right, so rotate left
+                 #   print("Tilting right — rotating left to stabilize.")
+                    #self.set_motor_velocity(-1.0, 1.0)
+                    self.rotate_safely(-1)
+                else:
+                    # Tilted left, so rotate right
+                 #   print("Tilting left — rotating right to stabilize.")
+                    #self.set_motor_velocity(1.0, -1.0)
+                    self.rotate_safely(1)
+
+                #self.robot.step(self.timestep * 10)
+                self.set_motor_velocity(25.0, 25.0)
 
 if __name__ == "__main__":
     print("A iniciar a execução")
-    MooseGreedySupervisor().run()
+    MooseNavigator().run()
