@@ -37,6 +37,7 @@ class MooseNavigator:
         if self.robot_node is None:
             print("ERROR: Could not find robot node with DEF 'MOOSEROBOT'")
         self.translation_field = self.robot_node.getField("translation")
+        #self.translation_field.setSFVec3f([10.00, 10.00, 3.10])
 
         # Motores
         self.left_motors = [self.robot.getDevice(f"left_motor_{i}") for i in range(1, 5)]
@@ -65,7 +66,10 @@ class MooseNavigator:
 
         self.max_speed = 6.28
 
-        self.randomize_positions2()
+        #self.randomize_positions2()
+        x_safe, y_safe, z_safe = self.find_safe_position()
+        self.translation_field.setSFVec3f([x_safe, y_safe, z_safe])
+        self.set_goal_position()
 
     def set_motor_velocity(self, left_speed, right_speed):
         for m in self.left_motors:
@@ -128,8 +132,61 @@ class MooseNavigator:
 
         return slope_magnitude, normal
 
+    def is_position_safe(self, x, y, robot_radius=0.2, max_slope=0.2):
+        """Check if the terrain at (x, y) is flat and stable for placing the robot."""
+        center_height = self.get_terrain_height(x, y)
+
+        # Sample nearby points to estimate slope
+        dx = dy = 0.1  # Sampling distance around the robot
+
+        heights = []
+        for dx_offset in [-dx, 0, dx]:
+            for dy_offset in [-dy, 0, dy]:
+                h = self.get_terrain_height(x + dx_offset, y + dy_offset)
+                heights.append(h)
+
+        min_h = min(heights)
+        max_h = max(heights)
+
+        # Calculate approximate slope as delta height over distance
+        slope = (max_h - min_h) / (2 * dx)
+
+        return slope <= max_slope
 
 
+    def find_safe_position(self):
+        for x in range(1, int(self.x_dim * self.x_spacing) - 1):
+            for y in range(1, int(self.y_dim * self.y_spacing) - 1):
+                wx = x * self.x_spacing
+                wy = y * self.y_spacing
+                if self.is_position_safe(wx, wy):
+                    z = self.get_terrain_height(wx, wy)
+                    print(f"Safe pos {wx}, {wy}, {z}")
+                    return (wx, wy, z + 0.41)
+        return None  # No safe spot found
+
+
+
+
+    def set_goal_position(self):
+        x_max = self.x_dim * self.x_spacing
+        y_max = self.y_dim * self.y_spacing
+        z_max = self.z_dim * self.z_spacing
+        self.bounds = {'x': (0.0, x_max), 'y': (0.0, y_max), 'z': (0.0, z_max)}
+
+        self.robot.step(self.timestep)
+
+        # Set goal position (no slope check, but you can add it similarly if needed)
+        goal_x = random.uniform(*self.bounds['x'])
+        goal_y = random.uniform(*self.bounds['y'])
+        #goal_z = self.get_terrain_height(goal_x, goal_y) +0.8
+        #self.goal = [goal_x, goal_y, goal_z]
+        self.goal = [goal_x, goal_y]
+
+        print(f"Goal position: ({self.goal[0]:.2f}, {self.goal[1]:.2f})")
+
+
+    '''
     def randomize_positions2(self):
         x_max = self.x_dim * self.x_spacing
         y_max = self.y_dim * self.y_spacing
@@ -167,7 +224,6 @@ class MooseNavigator:
         print(f"Goal position: ({self.goal[0]:.2f}, {self.goal[1]:.2f}, {self.goal[2]:.2f})")
 
 
-
     def randomize_positions(self):
         x_max = self.x_dim * self.x_spacing
         y_max = self.y_dim * self.y_spacing
@@ -192,6 +248,7 @@ class MooseNavigator:
         self.goal[2] = self.get_terrain_height(self.goal[0], self.goal[1]) + 0.05
 
         print(f"Goal position:  ({self.goal[0]:.2f}, {self.goal[1]:.2f}, {self.goal[2]:.2f})")
+    '''
 
 
     def distance_to_goal(self, pos):
@@ -228,17 +285,23 @@ class MooseNavigator:
     def run(self):
         contador = 0
         while self.robot.step(self.timestep) != -1:
-            contador+=1
             pos = self.gps.getValues()
             heading = self.get_heading()
             distance = self.distance_to_goal(pos)
 
-            if contador == 500:
-                print(f"({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f}), {self.get_terrain_height(pos[0], pos[1]):.2f}")
-                contador = 0
+            if contador == 0:
+                print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f}), map's Z: {self.get_terrain_height(pos[0], pos[1]):.2f}")
+
+            if contador<500:
+                contador +=1
+            else:
+                contador =0
 
             if distance < 0.2:
                 print("[SUCCESS] Reached goal")
+                print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
+                print(f"atual:({self.goal[0]:.2f}, {self.goal[1]:.2f})")
+
                 self.set_motor_velocity(0, 0)
                 #self.left_motor.setVelocity(0)
                 #self.right_motor.setVelocity(0)
@@ -285,12 +348,12 @@ class MooseNavigator:
                 # Decide safest rotation direction
                 if roll > 0:
                     # Tilted right, so rotate left
-                 #   print("Tilting right — rotating left to stabilize.")
+                    #print("Tilting right — rotating left to stabilize.")
                     #self.set_motor_velocity(-1.0, 1.0)
                     self.rotate_safely(-1)
                 else:
                     # Tilted left, so rotate right
-                 #   print("Tilting left — rotating right to stabilize.")
+                    #print("Tilting left — rotating right to stabilize.")
                     #self.set_motor_velocity(1.0, -1.0)
                     self.rotate_safely(1)
 
