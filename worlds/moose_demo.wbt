@@ -46,7 +46,7 @@ TexturedBackgroundLight {
   luminosity 0.8
 }
 DEF ELEVATION_GRID Solid {
-  translation -25 -25 -0.01
+  translation 0 0 0
   children [
     Shape {
       appearance SandyGround {
@@ -40070,8 +40070,8 @@ DEF ELEVATION_GRID Solid {
 }
 DEF MOOSEROBOT Robot {
   supervisor TRUE
-  translation -7.334202170180788 6.427717293600236 7.717722754844717
-  rotation -0.17944105748033282 0.1417470454058144 0.9735033035429627 0.5293334021982316
+  translation -7.334202170180788 6.427717293600236 7
+  rotation 0.0 0.0 0.0 0.0
   controller "<extern>"
 
   physics Physics {
