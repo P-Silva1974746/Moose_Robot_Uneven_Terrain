@@ -68,14 +68,6 @@ class MooseNavigator:
         return self.height_values[idx]
 
 
-    def height_at(self, x, y):
-        x = int(x)
-        y = int(y)
-        x = max(0, min(x, self.x_dim - 1))
-        y = max(0, min(y, self.y_dim - 1))
-        index = y * self.x_dim + x
-        return self.height_values[index]
-
     def get_slope_value(self, x, y, scale=10):
         #slope magnitude and surface normal at a grid position (x, y).
         #scale: size of the local area to calculate gradient from (must be odd). normal: np.array([x, y, z])
@@ -116,7 +108,6 @@ class MooseNavigator:
 
 
     def set_robot_position(self, x, y):
-        #z = self.height_at(x, y)
         z = self.get_terrain_height(x, y)
         pos_field = self.robot_node.getField("translation")
         pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])
@@ -257,18 +248,6 @@ class MooseNavigator:
             return True
         return False
 
-    '''
-    def force_escape(self, duration=1.0, speed=10.0):
-        print("Robo preso, forçar avanço")
-        self.set_motor_velocity(speed, speed)
-        steps = int((duration * 1000) / self.timestep)
-        for _ in range(steps):
-            if self.robot.step(self.timestep) == -1:
-                return
-        self.set_motor_velocity(0.0, 0.0)
-
-    #e caso fique parado por ter capotado
-    '''
 
     def get_greedy_motor_commands(self, current_pos, current_heading, goal_pos):
 
