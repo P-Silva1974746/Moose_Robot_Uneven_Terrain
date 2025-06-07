@@ -7,30 +7,6 @@ class MooseNavigator:
     def __init__(self):
         self.robot = Supervisor()
         # super().__init__()
-        '''
-        self.robot = Supervisor()
-        self.timestep = int(self.robot.getBasicTimeStep())
-
-        # Get robot node and fields (for random positioning)
-        self.robot_node = self.robot.getFromDef("MOOSEROBOT")
-        self.translation_field = self.robot_node.getField("translation")
-
-        # Motores
-        self.left_motors = [self.robot.getDevice(f"left_motor_{i}") for i in range(1, 5)]
-        self.right_motors = [self.robot.getDevice(f"right_motor_{i}") for i in range(1, 5)]
-
-        for motor in self.left_motors + self.right_motors:
-            motor.setPosition(float('inf'))
-            motor.setVelocity(0.0)
-
-
-        self.gps = self.robot.getDevice("gps")
-        self.gps.enable(self.timestep)
-
-        self.imu = self.robot.getDevice("inertial unit")
-        self.imu.enable(self.timestep)
-'''
-
         # Setup
         self.timestep = int(self.robot.getBasicTimeStep())
         self.robot_node = self.robot.getFromDef("MOOSEROBOT")
@@ -59,17 +35,16 @@ class MooseNavigator:
         self.height_values = [self.height_field.getMFFloat(i) for i in range(self.height_field.getCount())]
         self.x_dim = self.elevation_grid.getField("xDimension").getSFInt32()
         self.y_dim = self.elevation_grid.getField("yDimension").getSFInt32()
-        self.z_dim = self.elevation_grid.getField("yDimension").getSFInt32()
+        #self.z_dim = self.elevation_grid.getField("zDimension").getSFInt32()
         self.x_spacing = self.elevation_grid.getField("xSpacing").getSFFloat()
         self.y_spacing = self.elevation_grid.getField("ySpacing").getSFFloat()
-        self.z_spacing = self.elevation_grid.getField("ySpacing").getSFFloat()
+        #self.z_spacing = self.elevation_grid.getField("zSpacing").getSFFloat()
 
         self.max_speed = 6.28
 
         #self.randomize_positions2()
-        x_safe, y_safe, z_safe = self.find_safe_position()
-        self.translation_field.setSFVec3f([x_safe, y_safe, z_safe])
-        self.set_goal_position()
+        #self.set_robot_position()
+        #self.set_goal_position()
 
     def set_motor_velocity(self, left_speed, right_speed):
         for m in self.left_motors:
@@ -92,7 +67,7 @@ class MooseNavigator:
         # Get height value
         return self.height_values[idx]
 
-    '''
+
     def height_at(self, x, y):
         x = int(x)
         y = int(y)
@@ -100,16 +75,11 @@ class MooseNavigator:
         y = max(0, min(y, self.y_dim - 1))
         index = y * self.x_dim + x
         return self.height_values[index]
-    '''
+
     def get_slope_value(self, x, y, scale=10):
-        """
-        Computes the slope magnitude and surface normal at a grid position (x, y).
-        - `x`, `y`: grid coordinates (integers).
-        - `scale`: size of the local area to calculate gradient from (must be odd).
-        Returns:
-        - slope_magnitude: float
-        - normal: np.array([x, y, z])
-        """
+        #slope magnitude and surface normal at a grid position (x, y).
+        #scale: size of the local area to calculate gradient from (must be odd). normal: np.array([x, y, z])
+
         half_scale = scale // 2
         heights = np.zeros((scale, scale))
 
@@ -117,7 +87,6 @@ class MooseNavigator:
             for j in range(scale):
                 nx = x - half_scale + i
                 ny = y - half_scale + j
-                #heights[i, j] = self.height_at(nx, ny)
                 heights[i, j] = self.get_terrain_height(nx, ny)
 
         dz_dx, dz_dy = np.gradient(heights, self.x_spacing, self.y_spacing)
@@ -132,51 +101,49 @@ class MooseNavigator:
 
         return slope_magnitude, normal
 
-    def is_position_safe(self, x, y, robot_radius=0.2, max_slope=0.2):
-        """Check if the terrain at (x, y) is flat and stable for placing the robot."""
-        center_height = self.get_terrain_height(x, y)
 
-        # Sample nearby points to estimate slope
-        dx = dy = 0.1  # Sampling distance around the robot
+    def is_flat(self,x,y):
+        _, normal=self.get_slope_value(x,y, scale=20)
+        up=np.array([0,0,1], dtype=float)
 
-        heights = []
-        for dx_offset in [-dx, 0, dx]:
-            for dy_offset in [-dy, 0, dy]:
-                h = self.get_terrain_height(x + dx_offset, y + dy_offset)
-                heights.append(h)
+        # get axis of rotation
+        axis=np.cross(up,normal)
 
-        min_h = min(heights)
-        max_h = max(heights)
-
-        # Calculate approximate slope as delta height over distance
-        slope = (max_h - min_h) / (2 * dx)
-
-        return slope <= max_slope
+        if np.linalg.norm(axis)<1e-2: # if small is flat
+            return True
+        else:
+            return False
 
 
-    def find_safe_position(self):
-        for x in range(1, int(self.x_dim * self.x_spacing) - 1):
-            for y in range(1, int(self.y_dim * self.y_spacing) - 1):
-                wx = x * self.x_spacing
-                wy = y * self.y_spacing
-                if self.is_position_safe(wx, wy):
-                    z = self.get_terrain_height(wx, wy)
-                    print(f"Safe pos {wx}, {wy}, {z}")
-                    return (wx, wy, z + 0.41)
-        return None  # No safe spot found
+    def set_robot_position(self, x, y):
+        #z = self.height_at(x, y)
+        z = self.get_terrain_height(x, y)
+        pos_field = self.robot_node.getField("translation")
+        pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])
 
+        _, normal = self.get_slope_value(x, y, scale=15)
+        up=np.array([0, 0, 1], dtype=float)
+        axis=np.cross(up, normal)
+        axis/=np.linalg.norm(axis)
+
+        angle=np.arccos(np.clip(np.dot(up,normal), -1.0, 1.0))
+
+        rot_field = self.robot_node.getField("rotation")
+        rot_field.setSFRotation([axis[0], axis[1], axis[2], angle])
+
+        #self.robot.step(self.timestep)
 
 
 
     def set_goal_position(self):
         x_max = self.x_dim * self.x_spacing
         y_max = self.y_dim * self.y_spacing
-        z_max = self.z_dim * self.z_spacing
-        self.bounds = {'x': (0.0, x_max), 'y': (0.0, y_max), 'z': (0.0, z_max)}
+        #z_max = self.z_dim * self.z_spacing
+        self.bounds = {'x': (0.0, x_max), 'y': (0.0, y_max)}
 
-        self.robot.step(self.timestep)
+        #self.robot.step(self.timestep)
 
-        # Set goal position (no slope check, but you can add it similarly if needed)
+        # Set goal position
         goal_x = random.uniform(*self.bounds['x'])
         goal_y = random.uniform(*self.bounds['y'])
         #goal_z = self.get_terrain_height(goal_x, goal_y) +0.8
@@ -184,6 +151,7 @@ class MooseNavigator:
         self.goal = [goal_x, goal_y]
 
         print(f"Goal position: ({self.goal[0]:.2f}, {self.goal[1]:.2f})")
+        return goal_x, goal_y
 
 
     '''
@@ -259,30 +227,103 @@ class MooseNavigator:
     def angle_to_goal(self, pos):
         dx = self.goal[0] - pos[0]
         dy = self.goal[1] - pos[1]
-        return math.atan2(dy, dx)  # Note: atan2(dx, dy) -> facing +Z
+        return math.atan2(dy, dx)  # atan2(dx, dy) -> facing +Z
 
     def get_heading(self):
         # Yaw from IMU (orientation)
         roll, pitch, yaw = self.imu.getRollPitchYaw()
-        return yaw  # In radians
+        return yaw  # radians
 
 
 
     def back_up(self, duration_steps=10):
         self.set_motor_velocity(-2.0, -2.0)
-        for _ in range(duration_steps):
-            if self.robot.step(self.timestep) == -1:
-                break
+        #for _ in range(duration_steps):
+         #   if self.robot.step(self.timestep) == -1:
+          #      break
 
     def rotate_safely(self, direction, duration_steps=10):
         # direction: -1 for left, +1 for right
         self.set_motor_velocity(direction, -direction)
-        for _ in range(duration_steps):
+        #for _ in range(duration_steps):
+         #   if self.robot.step(self.timestep) == -1:
+          #      break
+
+
+
+    def is_robot_stuck(self, pos1, pos2):
+        distance = math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)
+        if distance < 0.02:
+            return True
+        return False
+
+    '''
+    def force_escape(self, duration=1.0, speed=10.0):
+        print("Robo preso, forçar avanço")
+        self.set_motor_velocity(speed, speed)
+        steps = int((duration * 1000) / self.timestep)
+        for _ in range(steps):
             if self.robot.step(self.timestep) == -1:
-                break
+                return
+        self.set_motor_velocity(0.0, 0.0)
+
+    #e caso fique parado por ter capotado
+    '''
+
+    def get_greedy_motor_commands(self, current_pos, current_heading, goal_pos):
+
+        distance = self.distance_to_goal(current_pos)
+        angle = self.angle_to_goal(current_pos)  # relative to goal
+        pitch, roll, _ = self.imu.getRollPitchYaw()
+
+        left_speed = 0.0
+        right_speed = 0.0
+
+        # stability
+        pitch_threshold = 0.25
+        roll_threshold = 0.25
+        if abs(pitch) > pitch_threshold or abs(roll) > roll_threshold:
+            # instable, try to stable without considering the goal
+            if roll > 0:  # Tilted right, so rotate left
+                return -1.0, 1.0
+            else:  # Tilted left, so rotate right
+                return 1.0, -1.0
+
+        # to the goal if not instable
+        if distance > 0.2:  # not arrived
+            if angle > 0.1:  # turn left
+                left_speed = 1.0
+                right_speed = 2.0
+            elif angle < -0.1:  # turn right
+                left_speed = 2.0
+                right_speed = 1.0
+            else:  # facing goal, go forward
+                left_speed = 2.0
+                right_speed = 2.0
+        else:  # arrived
+            left_speed = 0.0
+            right_speed = 0.0
+
+        max_speed = self.max_speed
+        left_speed = np.clip(left_speed, -max_speed, max_speed)
+        right_speed = np.clip(right_speed, -max_speed, max_speed)
+
+        return left_speed, right_speed
+
 
 
     def run(self):
+        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
+        while not self.is_flat(x=start[0], y=start[1]):
+            start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
+            print("start not flat")
+        goal = self.set_goal_position()
+        #goal = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
+
+        print(f"Iniciando execução... Posição inicial: {start}")
+        self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
+
+
         contador = 0
         while self.robot.step(self.timestep) != -1:
             pos = self.gps.getValues()
@@ -290,15 +331,20 @@ class MooseNavigator:
             distance = self.distance_to_goal(pos)
 
             if contador == 0:
+                last_pos = pos
                 print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f}), map's Z: {self.get_terrain_height(pos[0], pos[1]):.2f}")
 
             if contador<500:
                 contador +=1
             else:
-                contador =0
+                contador = 0
+                if self.is_robot_stuck(pos, last_pos):
+                    print(f"Robot is stuck")
+                    break
+
 
             if distance < 0.2:
-                print("[SUCCESS] Reached goal")
+                print("Success! Reached goal")
                 print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
                 print(f"atual:({self.goal[0]:.2f}, {self.goal[1]:.2f})")
 
@@ -316,7 +362,13 @@ class MooseNavigator:
               #  print(f"Heading: {math.degrees(heading):.1f}°, Goal angle: {math.degrees(desired_angle):.1f}°, Angle diff: {math.degrees(angle_diff):.1f}°")
                # contador = 0
 
-            # Control logic
+            '''
+            if self.is_robot_stuck():
+                self.force_escape()
+                continue
+            '''
+
+
             if abs(angle_diff) > 0.01745: #rad correspondente a 1º
                 # Turn in place
                 turn_speed = 1.0 if angle_diff > 0 else -1.0
@@ -338,9 +390,9 @@ class MooseNavigator:
             roll_threshold = 0.25
             pitch, roll, _ = self.imu.getRollPitchYaw()
             if abs(pitch) > pitch_threshold or abs(roll) > roll_threshold:
-              #  print("[INFO] Reversing due to instability")
+              #  print("Reversing due to instability")
                 self.set_motor_velocity(0, 0)
-                self.robot.step(self.timestep * 2)
+                #self.robot.step(self.timestep * 2)
                 #self.set_motor_velocity(-2.0, -2.0)
                 #self.robot.step(self.timestep * 10)
                 self.back_up()
