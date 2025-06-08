@@ -5,10 +5,14 @@ import time
 import csv
 import matplotlib.pyplot as plt
 import os
+import re
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from controller import Supervisor
+
+from env_maker import create_perlin_map
+
 
 class MooseSupervisor(Supervisor):
     def __init__(self):
@@ -123,9 +127,11 @@ class MooseSupervisor(Supervisor):
 
     def set_robot_position(self, x, y):
         z = self.height_at(x, y)
+        print(f"x: {x * self.x_spacing} | y: {y * self.y_spacing} | z: {z}")
         pos_field = self.robot.getField("translation")
         pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])  # Ajuste do z + altura segura
-
+        self.step(self.timestep)
+        print (f"Position after translating: {self.robot.getPosition()}")
         # calcula o gradiente do terrono em volta e retorna o vetor normal
         _, normal = self.get_slope_value(x, y, scale=15)
         # direcao que queremos alinhar com o vetor normal e o eixo z do robot
@@ -384,14 +390,26 @@ class MooseSupervisor(Supervisor):
                 stable_time = 0.0  # Reinicia o tempo de estabilidade se houver movimento
 
     def run(self):
-        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
+        path_file="../../worlds/moose_perlin_teste.wbt"
+        with open(path_file, 'r') as f:
+            data = f.read()
+        match = re.search(
+            r'DEF\s+MOOSEROBOT\s+Robot\s*{[^}]*?translation\s+([-\d.eE+]+)\s+([-\d.eE+]+)\s+([-\d.eE+]+)',
+            data,
+            re.DOTALL
+        )
+
+        if match:
+            x, y, z = map(float, match.groups())
+            start=(x,y)
+        else:
+            raise ValueError("MOOSEROBOT translation not found")
         while not self.is_flat(x=start[0], y=start[1]):
             start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
             print("Is not Flat")
-        goal = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
+        goal = (random.randint(0, self.x_dim - 35), random.randint(0, self.y_dim - 10))
 
         print(f"Iniciando execução... Posição inicial: {start}, Meta: {goal}")
-        self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
         path = self.a_star(start, goal)
         print(f"Caminho calculado: {path}")
 
