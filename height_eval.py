@@ -69,4 +69,4 @@ def plot_height_graphs(path_file="worlds/moose_perlin.wbt"):
         print(f"No data found in the file: {path_file}")
 
 if __name__ == "__main__":
-    plot_height_graphs(path_file="worlds/moose_perlin_teste.wbt")
+    plot_height_graphs(path_file="worlds/moose_perlin2.wbt")

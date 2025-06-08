@@ -31,7 +31,7 @@ def create_perlin_map(map_w=200, map_h=200, path_file="./worlds/moose_demo.wbt",
         # get random point to create the spawn zone
         x = random.randint(0,map_w-1)
         y = random.randint(0,map_h-1)
-        size_spawn=10
+        size_spawn=5
         spawn_heights=[]
 
 
@@ -46,7 +46,7 @@ def create_perlin_map(map_w=200, map_h=200, path_file="./worlds/moose_demo.wbt",
 
                 # To make a circular map uncomment this line and add the noise instead of assigning it
                 #new_height=30-45*dist/max_dist
-                new_height= perlin_noise((i+random.random())*noise_scale,(j+random.random())*noise_scale)*5
+                new_height= perlin_noise((i+random.random())*noise_scale,(j+random.random())*noise_scale)*10
                 if (x-size_spawn)<=i<(x+size_spawn) and (y-size_spawn)<=j<(y+size_spawn):
                     #print(f"The point {(i,j)} is part of the spawn")
                     spawn_heights.append(new_height)
@@ -93,4 +93,4 @@ def create_perlin_map(map_w=200, map_h=200, path_file="./worlds/moose_demo.wbt",
 
 
 if __name__ == "__main__":
-    create_perlin_map(path_new_file="worlds/moose_perlin_teste.wbt")
+    create_perlin_map(path_new_file="worlds/moose_perlin2.wbt")
