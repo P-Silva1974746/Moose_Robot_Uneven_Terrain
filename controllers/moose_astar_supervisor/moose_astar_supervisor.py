@@ -5,10 +5,13 @@ import time
 import csv
 import matplotlib.pyplot as plt
 import os
+import re
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from controller import Supervisor
+
+import pandas as pd
 
 class MooseSupervisor(Supervisor):
     def __init__(self):
@@ -18,10 +21,16 @@ class MooseSupervisor(Supervisor):
         self.battery_max_energy = 100.0
         self.battery_energy = self.battery_max_energy
         self.recharge_threshold = -0.05
+        self.stuck=False
+
 
         # Robot e terreno
         self.robot = self.getFromDef('MOOSEROBOT')
         self.moose_node = self.robot.getField("children").getMFNode(0)  # Assume que Moose é o primeiro filho
+
+        #Configurecoes que necessitam da instacancia do robot
+        self.initial_translation = self.robot.getField("translation").getSFVec3f()
+        self.initial_rotation = self.robot.getField("rotation").getSFRotation()
 
         self.elevation_field = self.getFromDef("EG").getField("height")
         self.elevation_grid = self.getFromDef('EG')
@@ -106,7 +115,7 @@ class MooseSupervisor(Supervisor):
         return slope_magnitude, normal
 
     def is_flat(self,x,y):
-        _, normal=self.get_slope_value(x,y, scale=20)
+        _, normal=self.get_slope_value(x,y, scale=5)
         up=np.array([0,0,1], dtype=float)
 
         # get axis of rotation
@@ -123,9 +132,11 @@ class MooseSupervisor(Supervisor):
 
     def set_robot_position(self, x, y):
         z = self.height_at(x, y)
+        print(f"x: {x * self.x_spacing} | y: {y * self.y_spacing} | z: {z}")
         pos_field = self.robot.getField("translation")
         pos_field.setSFVec3f([x * self.x_spacing, y * self.y_spacing, z + 0.5])  # Ajuste do z + altura segura
-
+        self.step(self.timestep)
+        print (f"Position after translating: {self.robot.getPosition()}")
         # calcula o gradiente do terrono em volta e retorna o vetor normal
         _, normal = self.get_slope_value(x, y, scale=15)
         # direcao que queremos alinhar com o vetor normal e o eixo z do robot
@@ -176,6 +187,8 @@ class MooseSupervisor(Supervisor):
             return float('inf')
 
         slope_deg = math.degrees(math.atan2(abs(h2 - h1), distance))
+        if abs(slope_deg) > 45:
+            return float('inf')
 
         return distance + abs(h2 - h1)  # custo com leve penalização
 
@@ -252,10 +265,14 @@ class MooseSupervisor(Supervisor):
 
     def go_to(self, target, d_tolerance=0.3):
         ang_tolerance=0.25 # se o robot estiver alinhado o sufeciente pode andar mais rapido
-        turning=False
         going_forward=False
 
-        while self.step(self.timestep) != -1:
+        # define the number of steps that the robot can be stuck
+        last_pos = self.gps.getValues()
+        max_stuck_steps=10000 # since each timeset are 4 mms this is equivalent to 40 sec
+        counter_stuck=0
+
+        while self.step(self.timestep) != -1 and counter_stuck < max_stuck_steps :
             MAX_SPEED = 26  # Velocidade máxima do robô
             turned=False
             pos = self.gps.getValues()
@@ -267,6 +284,14 @@ class MooseSupervisor(Supervisor):
                 #self.set_wheel_speeds(0.0, 0.0)
                 print("Robot got to {}".format(target))
                 return True
+
+            # calculate the distance between the current position and last position and check if it is stuck
+            dx_last= pos[0] - last_pos[0]
+            dy_last= pos[1] - last_pos[1]
+            if math.hypot(dx_last, dy_last) < 0.01:
+                counter_stuck+=1
+            else:
+                counter_stuck=0
 
             desired_angle = math.atan2(dy, dx)
             yaw = self.imu.getRollPitchYaw()[2]
@@ -284,14 +309,12 @@ class MooseSupervisor(Supervisor):
                 if not going_forward:
                     print(f"Velocidade na reta: {forward_speed}")
                 going_forward = True
-                turning = False
             # turning
             else:
                 #MAX_SPEED*=0.2
                 turn_speed=5*beta
                 left_speed=-turn_speed
                 right_speed=turn_speed
-                turned = True
 
 
 
@@ -300,46 +323,63 @@ class MooseSupervisor(Supervisor):
             right_speed = max(-MAX_SPEED, min(MAX_SPEED, right_speed))
 
             self.set_wheel_speeds(left_speed, right_speed)
+            last_pos = pos
+
+        self.stuck=True
+        return False
 
     def move_robot_and_log(self, path, euclidean_dist):
         print("Iniciando movimento...")
-        translation_field = self.robot.getField('translation')
         total_distance = 0.0  # agora é atualizado
         altitudes = []
+        speeds = []
 
+        initial_battery=self.battery_energy
         start_time = time.time()
         last_pos = self.grid_to_world(*path[0])
         last_alt = self.altimeter.getValue()
         altitudes.append(last_alt)
+        completed=True
 
         for i, (x, y) in enumerate(path):
             target_pos = self.grid_to_world(x, y)
             print(f"Movendo para: {target_pos}")
 
+            prev_time=time.time()
             success = self.go_to(target_pos)
+            curr_time=time.time()
 
             if not success:
-                print("Abortando caminho atual. Tentando nova rota...")
-                # Recalcula o caminho atual a partir da posição GPS real até o destino final
-                current_grid = (
-                    int(self.gps.getValues()[0] / self.x_spacing),
-                    int(self.gps.getValues()[1] / self.y_spacing)
-                )
-                new_path = self.a_star(current_grid, path[-1])
-                if len(new_path) > 1 and new_path[0] != new_path[-1]:
-                    self.move_robot_and_log(new_path, self.heuristic(current_grid, path[-1]))
+                if not self.stuck:
+                    print("Abortando caminho atual. Tentando nova rota...")
+                    # Recalcula o caminho atual a partir da posição GPS real até o destino final
+                    current_grid = (
+                        int(self.gps.getValues()[0] / self.x_spacing),
+                        int(self.gps.getValues()[1] / self.y_spacing)
+                    )
+                    new_path = self.a_star(current_grid, path[-1])
+                    if len(new_path) > 1 and new_path[0] != new_path[-1]:
+                        self.move_robot_and_log(new_path, self.heuristic(current_grid, path[-1]))
+                    else:
+                        print("Nenhuma rota alternativa viável encontrada.")
+                        completed=False
+                    break  # Interrompe execução atual
                 else:
-                    print("Nenhuma rota alternativa viável encontrada.")
-                return  # Interrompe execução atual
-
-            # Atualiza bateria com base em altitude e velocidade
-            curr_alt = self.altimeter.getValue()
-            speed = euclidean_dist / self.timestep
-            self.update_battery(last_alt, curr_alt, speed)
+                    print("Robot nao conseguiu concluir o caminho pois esta preso")
+                    completed=False
+                    break
 
             # Atualiza distâncias
             distance_traveled = math.hypot(target_pos[0] - last_pos[0], target_pos[1] - last_pos[1])
             total_distance += distance_traveled
+
+            # Atualiza bateria com base em altitude e velocidade
+            curr_alt = self.altimeter.getValue()
+            delta_time = curr_time - prev_time
+            speed = distance_traveled/ delta_time
+            speeds.append(speed)
+            self.update_battery(last_alt, curr_alt, speed)
+            self.battery_levels.append(self.battery_energy)
 
             last_pos = target_pos
             last_alt = curr_alt
@@ -347,12 +387,19 @@ class MooseSupervisor(Supervisor):
 
         end_time = time.time()
         total_time = end_time - start_time
+        avg_speed = np.mean(speeds)
+        battery_used = initial_battery-self.battery_energy
+        height_difference = np.max(altitudes) - np.min(altitudes)
+
         print(f"Distância total percorrida: {total_distance} metros")
         print(f"Tempo total: {total_time} segundos")
+        print(f"Velocidade media: {avg_speed} m/s")
+        print(f"Bateria utilizada: {battery_used} Wh")
+        print(f"Diferenca de altitude: {height_difference} m")
+        print(f"Completou a run: {completed}")
 
-        self.battery_levels.append(self.battery_energy)
 
-        return total_distance, total_time
+        return total_distance, total_time, avg_speed, battery_used, height_difference, completed
 
     def plot_battery(self):
         plt.plot(self.battery_levels)
@@ -383,15 +430,11 @@ class MooseSupervisor(Supervisor):
             else:
                 stable_time = 0.0  # Reinicia o tempo de estabilidade se houver movimento
 
-    def run(self):
-        start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
-        while not self.is_flat(x=start[0], y=start[1]):
-            start = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 25))
-            print("Is not Flat")
-        goal = (random.randint(0, self.x_dim - 25), random.randint(0, self.y_dim - 10))
+    def run(self, log_path="logs/performance.csv"):
+        start=(self.initial_translation[0],self.initial_translation[1])
+        goal = (random.randint(0, self.x_dim - 35), random.randint(0, self.y_dim - 10))
 
         print(f"Iniciando execução... Posição inicial: {start}, Meta: {goal}")
-        self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
         path = self.a_star(start, goal)
         print(f"Caminho calculado: {path}")
 
@@ -402,11 +445,48 @@ class MooseSupervisor(Supervisor):
         self.wait_until_still()  # Aguarda o robô estar completamente parado
         euclidean_dist = self.heuristic(start, goal)
         print(f"Distância euclidiana entre início e meta: {euclidean_dist:.2f} m")
-        self.move_robot_and_log(path, euclidean_dist)
+        total_distance, total_time, avg_speed, battery_used, height_difference, completed =self.move_robot_and_log(path, euclidean_dist)
         print("Execução finalizada com sucesso.")
+
+        data = {
+            "Distance": [euclidean_dist],
+            "Distance traveled": [total_distance],
+            "Time": [total_time],
+            "Avg Speed": [avg_speed],
+            "Battery Used": [battery_used],
+            "Height Difference": [height_difference],
+            "Completion": [completed]
+        }
+
+        df= pd.DataFrame(data=data)
+        try:
+            df.to_csv(path_or_buf=log_path, mode='a', header= not os.path.exists(log_path) ,index=False)
+        except Exception as e:
+            print(f"Failed to write the log: {e}")
+
+        self.plot_battery()
+
+    def reset_robot_state(self):
+        self.set_wheel_speeds(0, 0)
+        self.battery_energy = self.battery_max_energy
+        self.battery_levels = []
+        self.stuck = False
+
+        # Reset position and rotation
+        self.robot.getField("translation").setSFVec3f(self.initial_translation)
+        self.robot.getField("rotation").setSFRotation(self.initial_rotation)
+
+        self.step(self.timestep)
+        self.wait_until_still()
+
 
 # Esta implementação faz parte do código do robô Moose no Webots para navegação baseada no A*, com consumo de bateria e movimentos registrados.
 
 if __name__ == "__main__":
     print("Início da execução...")
-    MooseSupervisor().run()
+    moose_robot=MooseSupervisor()
+    for i in range(5):
+        moose_robot.run()
+        print(f"Finished run {i+1}")
+        print("----------------------------------------")
+        moose_robot.reset_robot_state()
