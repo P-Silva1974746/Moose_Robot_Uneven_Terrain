@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  10 JUN 2025 14:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  11 JUN 2025 14:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -746,6 +746,26 @@ File: microtype.cfg 2025/02/11 v3.2a microtype main configuration file (RS)
 )
 LaTeX Info: Redefining \microtypesetup on input line 3065.
 )
+(C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen306
+\lightrulewidth=\dimen307
+\cmidrulewidth=\dimen308
+\belowrulesep=\dimen309
+\belowbottomsep=\dimen310
+\aboverulesep=\dimen311
+\abovetopsep=\dimen312
+\cmidrulesep=\dimen313
+\cmidrulekern=\dimen314
+\defaultaddspace=\dimen315
+\@cmidla=\count334
+\@cmidlb=\count335
+\@aboverulesep=\dimen316
+\@belowrulesep=\dimen317
+\@thisruleclass=\count336
+\@lastruleclass=\count337
+\@thisrulewidth=\dimen318
+)
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2025-05-20 v7.01m Hypertext links for LaTeX
 
@@ -792,16 +812,16 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count334
+\c@section@level=\count338
 )
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
 ty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\@linkdim=\dimen306
-\Hy@linkcounter=\count335
-\Hy@pagecounter=\count336
+\@linkdim=\dimen319
+\Hy@linkcounter=\count339
+\Hy@pagecounter=\count340
  (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2025-05-20 v7.01m Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
@@ -809,7 +829,7 @@ Now handling font encoding PD1 ...
 ) (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count337
+\Hy@SavedSpaceFactor=\count341
  (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2025-05-20 v7.01m Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -822,14 +842,14 @@ Package hyperref Info: Plain pages OFF on input line 4172.
 Package hyperref Info: Backreferencing OFF on input line 4177.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4424.
-\c@Hy@tempcnt=\count338
+\c@Hy@tempcnt=\count342
 
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4763.
-\XeTeXLinkMargin=\dimen307
+\XeTeXLinkMargin=\dimen320
 
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
@@ -839,9 +859,9 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count339
-\Field@Width=\dimen308
-\Fld@charsize=\dimen309
+\Fld@menulength=\count343
+\Field@Width=\dimen321
+\Fld@charsize=\dimen322
 Package hyperref Info: Hyper figures OFF on input line 6042.
 Package hyperref Info: Link nesting OFF on input line 6047.
 Package hyperref Info: Hyper index ON on input line 6050.
@@ -854,15 +874,15 @@ Package hyperref Info: PDF/A mode OFF on input line 6072.
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count340
-\c@Item=\count341
-\c@Hfootnote=\count342
+\Hy@abspage=\count344
+\c@Item=\count345
+\c@Hfootnote=\count346
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
 File: hpdftex.def 2025-05-20 v7.01m Hyperref driver for pdfTeX
-\Fld@listcount=\count343
-\c@bookmark@seq@number=\count344
+\Fld@listcount=\count347
+\c@bookmark@seq@number=\count348
 
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
 echeck.sty
@@ -891,13 +911,12 @@ File: ot1ntxtlf.fd 2021/05/24 v1.0 font definition file for OT1/ntx/tlf
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
 (Font)              scaled to size 10.95pt on input line 26.
 
-(moose.aux)
+No file moose.aux.
 \openout1 = `moose.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 26.
 LaTeX Font Info:    Trying to load font information for OML+ntxmi on input line
  26.
-
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/newtx\omlntxmi.fd
 File: omlntxmi.fd 2015/08/25 Fontinst v1.933 font definitions for OML/ntxmi.
 )
@@ -946,16 +965,16 @@ LaTeX Info: Command `\ddddot' is already robust on input line 26.
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count345
-\scratchdimen=\dimen310
+\scratchcounter=\count349
+\scratchdimen=\dimen323
 \scratchbox=\box70
-\nofMPsegments=\count346
-\nofMParguments=\count347
+\nofMPsegments=\count350
+\nofMParguments=\count351
 \everyMPshowfont=\toks46
-\MPscratchCnt=\count348
-\MPscratchDim=\dimen311
-\MPnumerator=\count349
-\makeMPintoPDFobject=\count350
+\MPscratchCnt=\count352
+\MPscratchDim=\dimen324
+\MPnumerator=\count353
+\makeMPintoPDFobject=\count354
 \everyMPtoPDFconversion=\toks47
 )
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
@@ -1006,8 +1025,8 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-\c@mv@tabular=\count351
-\c@mv@boldtabular=\count352
+\c@mv@tabular=\count355
+\c@mv@boldtabular=\count356
 LaTeX Info: Redefining \microtypecontext on input line 26.
 Package microtype Info: Applying patch `item' on input line 26.
 Package microtype Info: Applying patch `toc' on input line 26.
@@ -1033,8 +1052,6 @@ Package microtype Info: No adjustment of character kerning.
 File: mt-ptm.cfg 2006/04/20 v1.7 microtype config. file: Times (RS)
 )
 Package hyperref Info: Link coloring OFF on input line 26.
-
-(moose.out) (moose.out)
 \@outlinefile=\write4
 \openout4 = `moose.out'.
 
@@ -1121,59 +1138,64 @@ LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
 (Font)              scaled to size 12.0pt on input line 36.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.95pt on input line 47.
+(Font)              scaled to size 10.95pt on input line 43.
 
 
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
-(Font)              scaled to size 10.95pt on input line 51.
+LaTeX Warning: Citation `Zhang2018DRL' on page 1 undefined on input line 43.
+
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 10.95pt on input line 51.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 8.0pt on input line 51.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.1pt on input line 51.
+(Font)              scaled to size 6.1pt on input line 50.
+
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
 
 
 [1{C:/Users/isabe/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/is
@@ -1182,32 +1204,31 @@ abe/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc}
 
 ]
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 87.
+(Font)              scaled to size 8.0pt on input line 86.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.1pt on input line 87.
+(Font)              scaled to size 6.1pt on input line 86.
 
-Underfull \hbox (badness 4621) in paragraph at lines 93--94
+Underfull \hbox (badness 4621) in paragraph at lines 92--93
 [] []\OT1/ntxtlf/b/n/10.95 (+20) Ob-ser-va-tion Space[] \OT1/ntxtlf/m/n/10.95 (
 +20) The agent re-ceives a six-
  []
 
-
-
 LaTeX Font Info:    Trying to load font information for TS1+ntxtlf on input lin
-e 96.
+e 95.
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/newtx\ts1ntxtlf.fd
 File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
 )
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.95pt on input line 96.
-LaTeX Font Info:    Trying to load font information for OT1+ntxtt on input line
- 131.
+(Font)              scaled to size 10.95pt on input line 95.
 
+
+LaTeX Font Info:    Trying to load font information for OT1+ntxtt on input line
+ 130.
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/newtx\ot1ntxtt.fd
 File: ot1ntxtt.fd 2012/04/20 v3.1
 )
 LaTeX Font Info:    Font shape `OT1/ntxtt/m/n' will be
-(Font)              scaled to size 10.95pt on input line 131.
+(Font)              scaled to size 10.95pt on input line 130.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `ntxtt' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
@@ -1215,8 +1236,178 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 
 [2{C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ts1.
-enc}] (moose.bbl
+enc}]
 
+LaTeX Warning: Reference `tab:greedy_summary' on page 3 undefined on input line
+ 160.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Missing \endgroup inserted.
+<inserted text> 
+                \endgroup 
+l.179 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Missing } inserted.
+<inserted text> 
+                }
+l.179 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Extra }, or forgotten \endgroup.
+\@endfloatbox ...pagefalse \outer@nobreak \egroup 
+                                                  \color@endbox 
+l.179 }
+       
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Missing } inserted.
+<inserted text> 
+                }
+l.179 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Too many }'s.
+\@begin@tempboxa ...begingroup #2\color@endgroup }
+                                                  \def \width {\wd \@tempbox...
+l.179 }
+       
+You've closed more groups than you opened.
+Such booboos are generally harmless, so keep going.
+
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Package graphics Error: Division by 0.
+
+See the graphics package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.179 }
+       
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:179: Extra \endgroup.
+\Gscale@box@dd ...\box \@tempboxa }\@end@tempboxa 
+                                                  
+l.179 }
+       
+Things are pretty mixed up, but I think the worst is over.
+
+
+LaTeX Warning: Reference `tab:astar_summary' on page 3 undefined on input line 
+185.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Missing \endgroup inserted.
+<inserted text> 
+                \endgroup 
+l.204 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Missing } inserted.
+<inserted text> 
+                }
+l.204 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Extra }, or forgotten \endgroup.
+\@endfloatbox ...pagefalse \outer@nobreak \egroup 
+                                                  \color@endbox 
+l.204 }
+       
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Missing } inserted.
+<inserted text> 
+                }
+l.204 }
+       
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Too many }'s.
+\@begin@tempboxa ...begingroup #2\color@endgroup }
+                                                  \def \width {\wd \@tempbox...
+l.204 }
+       
+You've closed more groups than you opened.
+Such booboos are generally harmless, so keep going.
+
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Package graphics Error: Division by 0.
+
+See the graphics package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.204 }
+       
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Rob
+ot_Uneven_Terrain/moose.tex:204: Extra \endgroup.
+\Gscale@box@dd ...\box \@tempboxa }\@end@tempboxa 
+                                                  
+l.204 }
+       
+Things are pretty mixed up, but I think the worst is over.
+
+
+
+(moose.bbl
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.95pt on input line 7.
 )
 
 Package caption Warning: Unused \captionsetup[figure] on input line 19.
@@ -1229,17 +1420,30 @@ See the caption package documentation for explanation.
 LaTeX2e <2025-06-01>
 L3 programming layer <2020/03/25>
  ***********
-Package rerunfilecheck Info: File `moose.out' has not changed.
-(rerunfilecheck)             Checksum: F2077FE0E70953A468E53EA5DAF320F0;2137.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `moose.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `moose.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  9A226D70C23420DD16F2C78B15DCAF20;2588.
  ) 
 Here is how much of TeX's memory you used:
- 28658 strings out of 468225
- 522264 string characters out of 5432973
- 928233 words of memory out of 5000000
- 56459 multiletter control sequences out of 15000+600000
- 681329 words of font info for 274 fonts, out of 8000000 for 9000
+ 28729 strings out of 468225
+ 523271 string characters out of 5432973
+ 930053 words of memory out of 5000000
+ 56523 multiletter control sequences out of 15000+600000
+ 681520 words of font info for 278 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,12n,91p,1101b,490s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,12n,91p,1101b,492s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/NewTXM
 I.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/Ne
 wTXMI5.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/public/new
@@ -1252,9 +1456,9 @@ type1/public/txfonts/txtt.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fon
 ts/type1/public/newtx/ztmb.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fo
 nts/type1/public/newtx/ztmr.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/f
 onts/type1/public/newtx/ztmri.pfb>
-Output written on moose.pdf (3 pages, 183193 bytes).
+Output written on moose.pdf (3 pages, 180816 bytes).
 PDF statistics:
- 133 PDF objects out of 1000 (max. 8388607)
- 19 named destinations out of 1000 (max. 500000)
- 53861 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 101 PDF objects out of 1000 (max. 8388607)
+ 22 named destinations out of 1000 (max. 500000)
+ 53773 words of extra memory for PDF output out of 61914 (max. 10000000)
 

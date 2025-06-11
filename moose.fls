@@ -210,6 +210,8 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\microtype
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\microtype.cfg
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\microtype.cfg
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\microtype.cfg
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\booktabs\booktabs.sty
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\booktabs\booktabs.sty
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\hyperref\hyperref.sty
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\hyperref\hyperref.sty
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\kvsetkeys\kvsetkeys.sty
@@ -267,9 +269,6 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1ntxtlf.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1ntxtlf.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1ntxtlf.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
-INPUT .\moose.aux
-INPUT .\moose.aux
-INPUT moose.aux
 OUTPUT moose.aux
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\omlntxmi.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\omlntxmi.fd
@@ -294,14 +293,8 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\00miktex\epstopdf-s
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\mt-ptm.cfg
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\mt-ptm.cfg
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\microtype\mt-ptm.cfg
-INPUT .\moose.out
-INPUT .\moose.out
-INPUT moose.out
-INPUT moose.out
-OUTPUT moose.pdf
-INPUT .\moose.out
-INPUT .\moose.out
 OUTPUT moose.out
+OUTPUT moose.pdf
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1minntx.fd
@@ -342,7 +335,6 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntxexa
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntxexa.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Bold-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Bold-tlf-ot1.tfm
-INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Italic-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Regular-tlf-ot1.tfm
@@ -384,9 +376,6 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Re
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntx-Bold-tlf-ot1.vf
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\txbmiaX.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Bold-tlf-ot1r.tfm
-INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntx-Italic-tlf-ot1.vf
-INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\NewTXMI.tfm
-INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Italic-tlf-ot1r.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntxsy.vf
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\txsys.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\txex-bar.tfm
@@ -399,6 +388,7 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1ntxtt.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex\latex\newtx\ot1ntxtt.fd
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\txfonts\txtt.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntxmi.vf
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\NewTXMI.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\stxscr.tfm
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntxmia.vf
 INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\txmiaSTbb.tfm
@@ -426,6 +416,9 @@ INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\txmiaS
 INPUT .\moose.bbl
 INPUT .\moose.bbl
 INPUT moose.bbl
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Italic-tlf-ot1.tfm
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\vf\public\newtx\ntx-Italic-tlf-ot1.vf
+INPUT C:\Users\isabe\AppData\Local\Programs\MiKTeX\fonts\tfm\public\newtx\ntx-Italic-tlf-ot1r.tfm
 INPUT moose.aux
 INPUT .\moose.out
 INPUT .\moose.out

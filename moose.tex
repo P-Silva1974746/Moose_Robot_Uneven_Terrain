@@ -8,11 +8,11 @@
 \usepackage{caption}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric}
-\usepackage{float}            % para [H] em figure
-\usepackage{newtxtext,newtxmath} % substitui times
-
-\usepackage{microtype}        % tipografia melhor
-\usepackage{hyperref}         % deve ser o último pacote carregado
+\usepackage{float}            
+\usepackage{newtxtext,newtxmath} 
+\usepackage{microtype}    
+\usepackage{booktabs}
+\usepackage{hyperref}        
 
 \titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{1em}{}
@@ -30,31 +30,30 @@
 
 \begin{abstract}
 \noindent
-This paper presents a deep reinforcement learning (DRL) approach for efficient navigation of the Moose robot in complex environments with unknown rough terrain. We train an Advantage Actor-Critic (A2C) model to optimise the robot's trajectory by minimising energy consumption while maintaining performance. The proposed solution is validated in simulation using diverse terrain maps, and its effectiveness is compared with traditional planning algorithms such as Greedy and A*.
+This paper presents a deep reinforcement learning (DRL) approach for efficient navigation of the Moose robot in complex environments with unknown rough terrain. We train an Advantage Actor-Critic (A2C) model to optimise the robot's trajectory while maintaining navigation performance. The proposed solution is validated in simulation using diverse terrain maps, and its effectiveness is compared with traditional planning algorithms such as Greedy and A*.
 \end{abstract}
 \vspace{1em}
 ]
 
 \section{Introduction}
-Mobile robots face significant challenges when navigating rough terrain, particularly in terms of balancing energy efficiency with robustness and speed. The Moose robot, equipped with various sensors, provides a suitable platform for exploring intelligent navigation strategies. The aim of this work is to train a DRL model that allows Moose to autonomously reach target locations efficiently, using minimal energy.
+Mobile robots face significant challenges when navigating rough terrain, particularly in terms of balancing robustness and speed. The Moose robot, equipped with various sensors, provides a suitable platform for exploring intelligent navigation strategies. The aim of this work is to train a DRL model that allows Moose to autonomously reach target locations efficiently, optimising its trajectory for reliable navigation.
 
 \section{Related Work}
 
-Several approaches have been proposed for mobile robot navigation, including traditional path planners like A* and greedy heuristics. These algorithms often rely on complete terrain information and do not explicitly optimize for energy efficiency. More recently, deep reinforcement learning has shown promise in solving complex control problems. Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for rough terrain navigation, demonstrating the potential of neural policy learning approaches in this domain.
-
+Several approaches have been proposed for mobile robot navigation, including traditional path planners like A* and greedy heuristics. These algorithms often rely on complete terrain information and do not explicitly optimise trajectory quality in uncertain environments. More recently, deep reinforcement learning has shown promise in solving complex control problems. Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for rough terrain navigation, demonstrating the potential of neural policy learning approaches in this domain.
 \section{Methodological Approach}
 
 \subsection{Terrain Generation Using Perlin Noise}
 
-To support the evaluation of navigation strategies under diverse topographic conditions, terrain surfaces are procedurally synthesised using Perlin noise — a gradient-based method known for generating smooth, naturalistic elevation profiles. This approach enables the creation of continuous, non-repetitive landscapes that emulate real-world geographical features such as slopes, hills, and valleys.
+To support the evaluation of navigation strategies in diverse topographical conditions, terrain surfaces are procedurally synthesised using Perlin noise — a gradient-based method known for generating smooth and naturalistic elevation profiles. This approach allows for the creation of continuous, non-repetitive landscapes that emulate real-world geographical features such as slopes, hills, and valleys.
 
-The simulation environment is constructed within \textit{Webots} and incorporates a 200\(\times\)200 elevation grid that defines a three-dimensional surface. Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to enhance terrain features, yielding realistic elevation differences suitable for evaluating the robot's mobility and energy usage.
+The simulation environment is built within Webots and incorporates a  200\(\times\)200 at defines a three-dimensional surface. Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to improve terrain characteristics, producing realistic elevation differences suitable for evaluating the robot's mobility and navigation performance.
 
-To integrate the generated elevation data, the world model is programmatically modified by replacing the default height map with the synthesised terrain. The region immediately surrounding the robot's starting position is flattened during a post-processing step to ensure stable episode initiation. The robot's initial coordinates are then adjusted to match this modified elevation, ensuring consistency between terrain and spawn location.
+To integrate the generated elevation data, the world model is modified programmatically, replacing the standard height map with the synthesised terrain. The region immediately surrounding the robot's initial position is flattened during a post-processing step to ensure a stable start to the episode. The robot's initial coordinates are then adjusted to match this modified elevation, ensuring consistency between the terrain and the spawn location.
 
-The procedural generation pipeline includes tools for analysing and visualising terrain characteristics. Statistical summaries — such as mean, standard deviation, and elevation range — are computed to evaluate the spatial variability of each generated map. Additionally, heatmaps of the elevation surface are produced using perceptually uniform colour gradients, allowing rapid visual inspection of terrain diversity.
+The procedural generation pipeline includes tools for analysing and visualising terrain characteristics. Statistical summaries — such as mean, standard deviation, and elevation range — are calculated to assess the spatial variability of each generated map. In addition, elevation surface heatmaps are produced using perceptually uniform colour gradients, allowing for quick visual inspection of terrain diversity.
 
-This synthetic terrain generation framework supports domain randomisation during training, enabling the learning and planning algorithms to generalise to a wide variety of environmental conditions. By adjusting noise parameters such as scale and frequency, it is possible to control the complexity and steepness of the generated maps, facilitating systematic robustness testing of navigation policies.
+This synthetic terrain generation framework supports the randomisation of domains important for training, allowing learning and planning algorithms to generalise to a wide variety of environmental conditions. By adjusting noise parameters such as scale and frequency, it is possible to control the complexity and slope of the generated maps, facilitating systematic testing of the robustness of navigation policies.
 
 \subsection{Path Planning with A* Algorithm}
 
@@ -154,13 +153,61 @@ Training is conducted using the \texttt{Stable Baselines3} implementation of A2C
 
 \section{Experimental Evaluation}
 
-Experiments were conducted over ***** independent runs within a simulated terrain environment. Key performance metrics included total distance travelled, execution time, average speed, battery usage, and altitude variation. 
+This section presents the evaluation results of the navigation algorithms Greedy and A* over 100 runs (10 runs on each of 10 different terrain maps). The performance metrics considered include planned distance, actual distance traveled, completion time, average speed, and navigation outcome (success or failure).
 
-\begin{itemize}
-    \item The A* algorithm consistently found viable paths avoiding excessively steep slopes.
-    \item Battery consumption correlated strongly with terrain elevation changes, validating the proposed energy model.
-    \item Dynamic re-routing improved success rates by recovering from navigation failures.
-\end{itemize}
+\subsection{Greedy Algorithm}
+
+Table~\ref{tab:greedy_summary} shows the aggregated statistics for the Greedy algorithm across the 100 runs.
+
+\begin{table}[H]
+\centering
+\caption{Summary statistics for the Greedy algorithm (100 runs).}
+\label{tab:greedy_summary}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Metric  & Mean & Std Dev & Min & Median & Max \\
+\midrule
+Distance (m)  & 109.48 & 40.18 & 29.89 & 100.50 & 190.34 \\
+Distance Traveled (m)  & 110.44 & 40.10 & 22.09 & 103.63 & 190.55 \\
+Time (s)  & 117.41 & 43.64 & 20.03 & 105.15 & 211.72 \\
+Average Speed (m/s)  & 0.98 & 0.21 & 0.57 & 0.97 & 1.53 \\
+Result (Success=1)  & 0.80 & 0.40 & 0 & 1 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+}
+
+The Greedy algorithm achieved a success rate of 80\%, with an average completion time of 117.41 seconds. The average speed was 0.98 m/s. The small difference between planned and traveled distance indicates generally efficient path following, although some variability is present.
+
+\subsection{A* Algorithm}
+
+Table~\ref{tab:astar_summary} presents the summary statistics for the A* algorithm over the same set of runs.
+
+\begin{table}[H]
+\centering
+\caption{Summary statistics for the A* algorithm (100 runs).}
+\label{tab:astar_summary}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Metric  & Mean & Std Dev & Min & Median & Max \\
+\midrule
+Distance (m)  & 112.02 & 37.11 & 52.23 & 103.33 & 179.67 \\
+Distance Traveled (m)  & 113.67 & 37.56 & 52.23 & 103.34 & 183.99 \\
+Time (s)  & 109.03 & 39.89 & 33.32 & 94.00 & 214.97 \\
+Average Speed (m/s)  & 1.04 & 0.19 & 0.58 & 1.05 & 1.65 \\
+Result (Success=1)  & 0.85 & 0.36 & 0 & 1 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+}
+
+The A* algorithm demonstrated a higher success rate of 85\% and slightly better average speed (1.04 m/s) compared to Greedy. The average completion time was lower at 109.03 seconds, reflecting the efficiency of the path planning.
+
+\subsection{Comparison and Discussion}
+
+The comparative analysis indicates that the A* algorithm outperforms the Greedy method in terms of success rate, speed, and completion time. Although distances planned and traveled are comparable, the lower time and higher speed achieved by A* suggest more efficient navigation paths and better adaptation to terrain.
 
 
 \section{Conclusions and Future Work}

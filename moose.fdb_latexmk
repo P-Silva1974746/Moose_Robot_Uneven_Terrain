@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex moose"] 1749561898.28779 "moose.aux" "moose.bbl" "moose" 1749561909.56167 0
+["bibtex moose"] 1749649061.38169 "moose.aux" "moose.bbl" "moose" 1749649973.50503 0
   "./references.bib" 1749545598 534 94fc314ae9f73f19a5c0c453636a497e ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/plain.bst" 1291864736 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "moose.aux" 1749561905 1982 afa8cf76dd113a9fdbdf013213b865c3 "pdflatex"
+  "moose.aux" 1749649971 2356 eaea3e278866df06a5167e73666a5c5e "pdflatex"
   (generated)
   "moose.bbl"
   "moose.blg"
   (rewritten before read)
-["pdflatex"] 1749561899.67403 "c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Robot_Uneven_Terrain/moose.tex" "moose.pdf" "moose" 1749561909.56372 0
-  "C:/Users/isabe/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1749561566 164858 1926c8d7bd1823f0c8393a5c0272d2d9 ""
+["pdflatex"] 1749649969.87011 "c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Robot_Uneven_Terrain/moose.tex" "moose.pdf" "moose" 1749649973.50619 2
+  "C:/Users/isabe/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1749648955 164858 1926c8d7bd1823f0c8393a5c0272d2d9 ""
   "C:/Users/isabe/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1749544299 13234938 b30c108d178debbb3e38e09b394e2acb ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc" 1736607166 2083 60e36f8eac802fcaf19eabe2633b406e ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1525740614 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -151,6 +151,7 @@
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/base/ifthen.sty" 1748713274 5525 1593ca62a2554dd7423fc8a4e5a82125 ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/base/size11.clo" 1748713274 8464 f339f4d5391fbe0425b2d94c90e6819e ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/base/textcomp.sty" 1748713274 2846 e26604d3d895e65d874c07f30c291f3f ""
+  "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/booktabs/booktabs.sty" 1579093635 6253 f1cb470c9199e7110a27851508ed7a5c ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/caption/caption.sty" 1696169587 56128 c2ccf1a29d78c33bc553880402e4fb9a ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/caption/caption3.sty" 1696169587 72619 ee90b6612147680fd73c3b1406a74245 ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/carlisle/scalefnt.sty" 1522607821 1360 df2086bf924b14b72d6121fe9502fcdb ""
@@ -217,11 +218,11 @@
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/xpatch/xpatch.sty" 1585221260 8510 7803f78066c4f9d008405191a4b43073 ""
   "C:/Users/isabe/AppData/Local/Programs/MiKTeX/tex/latex/xstring/xstring.sty" 1693735632 123 a302f2c651a95033260db60e51527ae8 ""
-  "c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Robot_Uneven_Terrain/moose.tex" 1749561896 10865 aaa4018b1eadb66bed627cacfeb56d76 ""
-  "moose.aux" 1749561905 1982 afa8cf76dd113a9fdbdf013213b865c3 "pdflatex"
-  "moose.bbl" 1749561899 382 79a00f542cd38be08f9dd988771b854b "bibtex moose"
-  "moose.out" 1749561905 2137 f2077fe0e70953a468e53ea5daf320f0 "pdflatex"
-  "moose.tex" 1749561896 10865 aaa4018b1eadb66bed627cacfeb56d76 ""
+  "c:/Users/isabe/OneDrive/Ambiente de Trabalho/Robotica/PycharmProjects/Moose_Robot_Uneven_Terrain/moose.tex" 1749649963 12903 a3921b4c6b07fc0906414edd12629a97 ""
+  "moose.aux" 1749649971 2356 eaea3e278866df06a5167e73666a5c5e "pdflatex"
+  "moose.bbl" 1749649061 382 79a00f542cd38be08f9dd988771b854b "bibtex moose"
+  "moose.out" 1749649971 2588 9a226d70c23420dd16f2c78b15dcaf20 "pdflatex"
+  "moose.tex" 1749649963 12903 a3921b4c6b07fc0906414edd12629a97 ""
   (generated)
   "moose.aux"
   "moose.log"
