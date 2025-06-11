@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  11 JUN 2025 23:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  11 JUN 2025 23:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -413,7 +413,7 @@ L3 programming layer <2025-05-26>
 Here is how much of TeX's memory you used:
  4319 strings out of 468225
  68894 string characters out of 5432973
- 492499 words of memory out of 5000000
+ 491499 words of memory out of 5000000
  32793 multiletter control sequences out of 15000+600000
  667629 words of font info for 116 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -434,7 +434,7 @@ Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C
 C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><
 C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
 
-Output written on moose.pdf (6 pages, 578623 bytes).
+Output written on moose.pdf (6 pages, 578624 bytes).
 PDF statistics:
  95 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
