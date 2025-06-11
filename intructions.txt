@@ -6,7 +6,7 @@ WEBOTS_HOME: /usr/local/webots
 
 1-It is necessary to install the python packages listed in requirements.txt
 2- To run the A* and Greedy algorithm using Pycharm it is necessary to have webots opened and one of the perlin_noise maps opened, then just run it via the run button of Pycharm
-3- To run the A2C it is necessary to have to terminals opened as well as the Webots with the map loaded, first we run controllers/moose_gym/moose_controller.py in one terminal
+3- To run the A2C it is necessary to have two terminals opened as well as the Webots with the map loaded, first we run controllers/moose_gym/moose_controller.py in one terminal
 only after that controller is running we can run in the other terminal the train.py
 
 To create or evaluate maps is just running the env_maker or the height_anal in the terminal, change the path to the one you want
