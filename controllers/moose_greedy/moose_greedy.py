@@ -1,5 +1,7 @@
 import math
 import random
+import csv
+import os
 import numpy as np
 from controller import Supervisor, InertialUnit
 
@@ -41,6 +43,8 @@ class MooseNavigator:
         #self.z_spacing = self.elevation_grid.getField("zSpacing").getSFFloat()
 
         self.max_speed = 6.28
+        self.total_distance = 0.0
+        self.speeds_history = []
 
         #self.randomize_positions2()
         #self.set_robot_position()
@@ -248,7 +252,7 @@ class MooseNavigator:
             return True
         return False
 
-
+    '''
     def get_greedy_motor_commands(self, current_pos, current_heading, goal_pos):
 
         distance = self.distance_to_goal(current_pos)
@@ -288,7 +292,7 @@ class MooseNavigator:
         right_speed = np.clip(right_speed, -max_speed, max_speed)
 
         return left_speed, right_speed
-
+    '''
 
 
     def run(self):
@@ -301,7 +305,13 @@ class MooseNavigator:
 
         print(f"Iniciando execução... Posição inicial: {start}")
         self.set_robot_position(start[0] * self.x_spacing, start[1] * self.y_spacing)
+        self.total_distance =0
+        self.last_pos = self.gps.getValues()
+        self.speeds_history = []
 
+        dist= self.distance_to_goal(start)
+        #dist=math.hypot(goal[0] - start[0], goal[1] - start[1])
+        print(f"Distância total: {dist:.2f}")
 
         contador = 0
         while self.robot.step(self.timestep) != -1:
@@ -309,11 +319,26 @@ class MooseNavigator:
             heading = self.get_heading()
             distance = self.distance_to_goal(pos)
 
+            if self.last_pos is not None:
+                # Calcula a distância entre o ponto atual e o ponto anterior (last_pos)
+                segment_distance = math.sqrt(
+                    (pos[0] - self.last_pos[0]) ** 2 +
+                    (pos[1] - self.last_pos[1]) ** 2)
+
+                self.total_distance += segment_distance
+            self.last_pos = pos
+
+
+            if self.timestep > 0 and segment_distance > 0:
+                instant_speed = segment_distance / (self.timestep / 1000.0)  # self.timestep é em ms, converter para s
+                self.speeds_history.append(instant_speed)
+
+
             if contador == 0:
                 last_pos = pos
                 print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f}), map's Z: {self.get_terrain_height(pos[0], pos[1]):.2f}")
 
-            if contador<500:
+            if contador<5000:
                 contador +=1
             else:
                 contador = 0
@@ -322,8 +347,15 @@ class MooseNavigator:
                     break
 
 
+            avg_speed = 0.0
+            if self.speeds_history:
+                avg_speed = np.mean(self.speeds_history)
+
+
             if distance < 0.2:
                 print("Success! Reached goal")
+                print(f"Distância total percorrida: {self.total_distance:.2f}")
+                print(f"Velocidade média: {avg_speed:.2f}")
                 print(f"atual:({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
                 print(f"atual:({self.goal[0]:.2f}, {self.goal[1]:.2f})")
 
