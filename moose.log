@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  11 JUN 2025 22:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.6.10)  11 JUN 2025 23:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -339,35 +339,35 @@ abe/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 93.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 94.
 
 
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 93.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 94.
 
 
 (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Underfull \hbox (badness 1852) in paragraph at lines 97--98
+Underfull \hbox (badness 1852) in paragraph at lines 98--99
 []\OT1/ptm/m/n/10 The pro-ce-du-ral gen-er-a-tion pipeline in-cludes tools for
  []
+
+
 
 <heatmap_terrain.png, id=8, 803.0pt x 602.25pt>
 File: heatmap_terrain.png Graphic file (type png)
 <use heatmap_terrain.png>
-Package pdftex.def Info: heatmap_terrain.png  used on input line 101.
+Package pdftex.def Info: heatmap_terrain.png  used on input line 102.
 (pdftex.def)             Requested size: 252.0pt x 189.00215pt.
-
-
 
 
 [2 <./heatmap_terrain.png>]
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 180--181
+Underfull \hbox (badness 10000) in paragraph at lines 179--180
 []\OT1/ptm/m/n/10 The ab-so-lute 3D co-or-di-nates of the goal
  []
 
@@ -375,14 +375,18 @@ Underfull \hbox (badness 10000) in paragraph at lines 180--181
 
 [3]
 LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 2
-38.
+37.
  (C:\Users\isabe\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
 
 
-[4] (moose.bbl)
+[4]
+
+(moose.bbl
+
+[5])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -398,7 +402,7 @@ Before submitting the final camera ready copy, remember to:
 
 
 
-[5
+[6
 
 ] (moose.aux)
  ***********
@@ -407,13 +411,13 @@ L3 programming layer <2025-05-26>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 4317 strings out of 468225
- 68871 string characters out of 5432973
- 489476 words of memory out of 5000000
- 32792 multiletter control sequences out of 15000+600000
- 666522 words of font info for 115 fonts, out of 8000000 for 9000
+ 4319 strings out of 468225
+ 68894 string characters out of 5432973
+ 491499 words of memory out of 5000000
+ 32793 multiletter control sequences out of 15000+600000
+ 667629 words of font info for 116 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,11n,65p,742b,261s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,11n,65p,1201b,261s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmex10.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
 fonts/cm/cmmi10.pfb><C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/p
@@ -430,9 +434,9 @@ Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C
 C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><
 C:/Users/isabe/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
 
-Output written on moose.pdf (5 pages, 572575 bytes).
+Output written on moose.pdf (6 pages, 578618 bytes).
 PDF statistics:
- 92 PDF objects out of 1000 (max. 8388607)
+ 95 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

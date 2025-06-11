@@ -36,7 +36,7 @@
     \IEEEauthorblockA{
         Department of Computer Science \\
         University of Porto, Portugal \\
-        202205150@edu.fc.up.pt
+        up202205150@edu.fc.up.pt
     }
 }
 
@@ -44,8 +44,9 @@
 \maketitle
 
 \begin{abstract}
-This paper presents a deep reinforcement learning (DRL) approach for efficient navigation of the Moose robot in complex environments with unknown rough terrain. We train an Advantage Actor-Critic (A2C) model to optimise the robot's trajectory while maintaining navigation performance. The proposed solution is validated in simulation using diverse terrain maps, and its effectiveness is compared with traditional planning algorithms such as Greedy and A*.
+This paper presents a deep reinforcement learning (DRL) approach for efficient navigation of the Moose robot in complex environments with unknown rough terrain. We train an Advantage Actor-Critic (A2C) model to optimise the robot's trajectory while maintaining navigation performance. The proposed solution is validated in simulation using diverse terrain maps, and its effectiveness is compared with traditional planning algorithms such as Greedy and A*. Although the DRL agent was able to perform well in simpler settings, it consistently failed to learn an effective policy in more complex maps. The main challenges identified include reward sparsity—due to the low frequency of successful goal-reaching episodes—and premature episode terminations caused by the robot being detected as stuck. In contrast, traditional planners such as A* showed robust performance. These results suggest that while DRL can capture basic navigation behaviors, more intricate tasks require additional strategies such as curriculum learning or transfer learning from simpler environments.
 \end{abstract}
+
 
 \begin{IEEEkeywords}
 Reinforcement Learning, Navigation, Rough Terrain, A2C, Moose Robot
@@ -174,9 +175,7 @@ At each control step, the agent receives a structured observation vector compris
 \begin{itemize}
     \item The robot's 3D position $(x, y, z)$, retrieved from onboard GPS.
     \item Orientation angles $(\phi, \theta, \psi)$ (roll, pitch, yaw), provided by the inertial measurement unit (IMU).
-    \item Local terrain elevation extracted from a digital elevation map.
     \item A point cloud obtained from a 4-layer sparse 3D LIDAR, enabling obstacle detection and spatial perception.
-    \item The relative displacement vector to the goal location.
     \item The absolute 3D coordinates of the goal $(x_{\text{goal}}, y_{\text{goal}}, z_{\text{goal}})$.
 \end{itemize}
 
@@ -308,16 +307,65 @@ Result (Success=1)  & 0.85 & 0.36 & 0 & 1 & 1 \\
 }
 \end{table}
 
-The A* algorithm demonstrated a higher success rate of 85\% and slightly better average speed (1.04 m/s) compared to Greedy. The average completion time was lower at 109.03 seconds, reflecting the efficiency of the path planning.
+The A* algorithm demonstrated a higher success rate of 85\% and slightly better average speed (1.04 m/s) compared to Greedy. The average completion time was lower at 226.01 seconds, reflecting the efficiency of the path planning.
+\subsection{A2C Algorithm}
+
+Table~\ref{tab:a2c_summary} presents the performance of the A2C algorithm based on the collected data.
+
+\begin{table}[ht]
+\centering
+\caption{Summary statistics for the A2C algorithm (100 runs).}
+\label{tab:a2c_summary}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+Metric  & Mean & Std Dev & Min & Median & Max \\
+\midrule
+Distance (m)           & 102.57 & 41.27 & 15.22 & 98.11  & 203.68 \\
+Distance Traveled (m)  & 79.96  & 70.91 & 0.03  & 82.63  & 289.81 \\
+Time (s)               & 63.51  & 69.55 & 13.16 & 48.16  & 678.76 \\
+Average Speed (m/s)    & 1.89   & 2.35  & 0.00  & 1.47   & 8.53 \\
+Result (Success=1)     & 0.00   & 0.00  & False & 0.00   & False \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Despite its high theoretical potential, the A2C algorithm failed to successfully complete any of the 100 navigation tasks (\textbf{0\% success rate}). The average completion time was 63.51 seconds, which is lower than the heuristic methods, but this is likely due to premature termination or failure. While the average speed appears high (1.89~m/s), it is misleading, as most runs failed and the robot either did not move or made erratic movements. This is also reflected in the high standard deviation and extreme values observed in distance traveled and average speed.
 
 \subsection{Comparison and Discussion}
 
-The comparative analysis indicates that the A* algorithm outperforms the Greedy method in terms of success rate, speed, and completion time. Although distances planned and traveled are comparable, the lower time and higher speed achieved by A* suggest more efficient navigation paths and better adaptation to terrain.
+The comparative analysis indicates that the A* algorithm outperforms the Greedy method in terms of success rate, speed, and completion time. Although the planned and traveled distances are similar, A* achieves better efficiency in path execution.
 
+The A2C algorithm, however, failed all navigation attempts in this experiment. Although it reported high average speeds, the results suggest erratic behavior and lack of convergence in the policy. The large standard deviation in traveled distance and the near-zero values in many runs point to unstable or inconsistent navigation. This highlights the challenge of training DRL models in complex, variable terrains and reinforces the importance of extensive tuning, environment shaping, and policy regularization.
+
+% Additional insight: low correlation (r=0.27) between time and traveled distance for A2C suggests poor coordination.
 
 \section{Conclusions and Future Work}
 
-This study demonstrates the feasibility of using deep reinforcement learning to improve efficiency in robot navigation. While DRL outperforms heuristic-based approaches in varied environments, future work should focus on transfer learning for real-world deployment and adapting the model for dynamic obstacles.
+This study compared heuristic-based and learning-based navigation strategies for a mobile robot operating in irregular terrain environments. The A* algorithm consistently outperformed the Greedy approach, achieving higher success rates, faster completion times, and more efficient path execution. These results reaffirm the robustness and reliability of heuristic planning methods in structured and partially known environments.
+
+On the other hand, the A2C-based deep reinforcement learning (DRL) agent failed to learn an effective navigation policy. Across 100 evaluation runs, the agent did not successfully complete any episode. We suspect that this failure stems from two main factors:
+
+\begin{itemize}
+    \item \textbf{Sparse rewards:} Due to the large map size, the agent rarely reached the goal during training---in fact, this occurred only once throughout the entire training process. As a result, the reward signal was too infrequent to effectively guide policy learning.
+    
+    \item \textbf{Premature termination:} Most training episodes ended with the robot being classified as ``stuck''. Despite efforts to improve the stuck-detection mechanism, this issue persisted, causing a majority of episodes to terminate early and further reducing the opportunity for meaningful learning.
+\end{itemize}
+
+To address these limitations, future work will explore alternative strategies to support DRL learning, including:
+
+\begin{itemize}
+    \item \textbf{Curriculum learning:} Starting training on smaller, simpler maps with denser rewards could help the agent learn basic navigation behaviors before scaling up to complex environments.
+    
+    \item \textbf{Transfer learning:} Leveraging policies pre-trained on simpler maps to initialize learning in the large-scale terrain could improve convergence and performance.
+    
+    \item \textbf{Reward shaping:} Incorporating intermediate rewards for progress toward the goal or for overcoming local elevation challenges may provide more effective feedback for learning.
+    
+    \item \textbf{Improved failure detection:} Refining the criteria used to determine when the robot is stuck can prevent premature episode termination and allow the agent to better explore the environment.
+\end{itemize}
+
+Despite the negative results for the DRL model in this iteration, the experiment offers valuable insight into the challenges of applying reinforcement learning in real-world-inspired robotic navigation. With improved design choices and training strategies, DRL still holds potential as a flexible and adaptive solution for autonomous navigation in irregular terrains.
 
 \bibliographystyle{plain}
 \bibliography{references}
