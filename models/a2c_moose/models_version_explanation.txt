@@ -1,0 +1,5 @@
+models explanation:
+	-v1: no Lidar
+	-v2: Lidar added
+	-v3: Goal pos added
+	-v4: Stuck is when moving slower or at 0.9 km/h added
