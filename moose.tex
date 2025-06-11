@@ -12,6 +12,7 @@
 \usepackage{newtxtext,newtxmath} 
 \usepackage{microtype}    
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{hyperref}        
 
 \titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
@@ -41,6 +42,8 @@ Mobile robots face significant challenges when navigating rough terrain, particu
 \section{Related Work}
 
 Several approaches have been proposed for mobile robot navigation, including traditional path planners like A* and greedy heuristics. These algorithms often rely on complete terrain information and do not explicitly optimise trajectory quality in uncertain environments. More recently, deep reinforcement learning has shown promise in solving complex control problems. Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for rough terrain navigation, demonstrating the potential of neural policy learning approaches in this domain.
+
+
 \section{Methodological Approach}
 
 \subsection{Terrain Generation Using Perlin Noise}
@@ -53,11 +56,50 @@ To integrate the generated elevation data, the world model is modified programma
 
 The procedural generation pipeline includes tools for analysing and visualising terrain characteristics. Statistical summaries — such as mean, standard deviation, and elevation range — are calculated to assess the spatial variability of each generated map. In addition, elevation surface heatmaps are produced using perceptually uniform colour gradients, allowing for quick visual inspection of terrain diversity.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{heatmap_terrain.png}
+    \caption{Heatmap visualization of the generated terrain elevation using Perlin noise. The colour gradient reflects elevation levels, with warmer colours indicating higher elevations.}
+    \label{fig:heatmap_terrain}
+\end{figure}
+
+
 This synthetic terrain generation framework supports the randomisation of domains important for training, allowing learning and planning algorithms to generalise to a wide variety of environmental conditions. By adjusting noise parameters such as scale and frequency, it is possible to control the complexity and slope of the generated maps, facilitating systematic testing of the robustness of navigation policies.
+
+\subsection{Greedy Navigation Controller}
+
+As a baseline control strategy, a rule-based greedy navigation controller was implemented to guide the robot towards the target using only local sensor data.
+
+At each simulation step, the robot estimates its current heading and position relative to the goal using data from its GPS and IMU sensors. The heading angle is extracted from the yaw component of the IMU, while the displacement vector to the goal is derived from GPS coordinates.
+
+The controller prioritises actions that reduce the Euclidean distance to the target:
+\[
+d_t = \sqrt{(x_g - x_t)^2 + (y_g - y_t)^2}
+\]
+It then calculates the angular deviation $\Delta\theta$ between the robot's orientation and the vector to the goal. If $|\Delta\theta| > 0.01745$ radians (1 degree), the robot rotates in place to align with the goal direction. Once alignment is achieved, it proceeds forward with a constant velocity.
+
+In addition to heading control, the robot monitors its pitch and roll values continuously. If these exceed a predefined inclination threshold (indicating unsafe slopes), the robot prioritises stability by entering a recovery manoeuvre: it induces rotation in the direction opposite to the tilt. This behaviour prevents traversal of steep regions and reduces the risk of falling or flipping, thereby improving navigation safety.
+
+\paragraph{Recovery Behaviour}
+
+To detect stagnation or local minima, the controller compares successive GPS positions. If minimal displacement is observed over a defined window, the robot performs a rotational escape routine. This heuristic aims to dislodge the robot from potentially blocked or unstable terrain.
+
+\paragraph{Termination Criteria}
+
+An episode terminates under the following conditions:
+
+\begin{itemize}
+    \item The robot reaches within a specified proximity to the goal.
+    \item A timeout of 120 seconds is exceeded.
+\end{itemize}
+
+Despite its simplicity, this greedy strategy establishes a valuable performance baseline. It enables comparisons against planning-based and learning-based approaches under diverse terrain conditions.
 
 \subsection{Path Planning with A* Algorithm}
 
 Navigation commences with a global planning module based on the A* search algorithm, adapted to account for terrain irregularities. The operational environment is discretised into a two-dimensional grid, with each cell assigned a traversal cost influenced by local terrain features, such as slope and elevation.
+
+Each cell considers an \textbf{8-connected neighborhood}, allowing transitions in both axial and diagonal directions. Diagonal movements incur higher traversal costs, reflecting their increased Euclidean distance ($\sqrt{2}$) relative to axial steps. This preserves geometric consistency and penalises sharp turns on rugged terrain.
 
 The pathfinding cost function is defined as:
 \[
@@ -65,7 +107,7 @@ f(n) = g(n) + h(n)
 \]
 where $g(n)$ represents the cumulative cost from the origin to node $n$, computed as the Euclidean distance scaled by a terrain roughness factor derived from local elevation gradients. 
 
-To ensure physically plausible trajectories, impassable areas and steep inclines are assigned prohibitively high traversal costs. The slope at each cell is estimated via numerical gradients over a local elevation window, and terrain flatness is evaluated by checking the alignment of the local surface normal with the vertical axis.
+To ensure physically plausible trajectories, impassable areas and steep inclines are assigned prohibitively high traversal costs. The slope at each cell is estimated via numerical gradients over a local elevation window, and terrain flatness is evaluatedby measuring the terrain gradient derived from local elevation differences.
 
 The heuristic term $h(n)$ estimates the remaining cost to the goal:
 \[
@@ -74,7 +116,6 @@ h(n) = \lambda \cdot \sqrt{(x_g - x_n)^2 + (y_g - y_n)^2}
 where $\lambda$ modulates the influence of distance based on estimated terrain roughness. This formulation guides the planner towards geometrically direct yet traversable paths that respect the robot’s locomotion constraints.
 
 This enhanced cost model enables the planner to favour routes that avoid steep or unstable regions, promoting both efficiency and safety in terrain-constrained environments.
-
 \subsection{Robot Control via A2C}
 
 An alternative control architecture employs the Advantage Actor-Critic (A2C) algorithm. In this setup, a reinforcement learning (RL) agent interacts with the robot via a TCP/IP socket interface, enabling external control of motor velocities based on continuous feedback from the environment.
@@ -85,7 +126,7 @@ The robot operates in a continuous action space:
 \[
 a = [v_{\text{left}}, v_{\text{right}}], \quad v \in [-1, 1]
 \]
-where $v_{\text{left}}$ and $v_{\text{right}}$ represent the normalised velocities of the left and right wheels, respectively.
+where $v_{\text{left}}$ and $v_{\text{right}}$ represent the normalized velocities of the left and right wheels, respectively.
 
 \paragraph{Observation Space}
 
@@ -111,6 +152,8 @@ R_t =
 \end{cases}
 \]
 where \( d_t \) is the current distance to the goal, \( d_{\min} \) is the minimal distance reached so far, \( T_{\text{total}} \) is the elapsed time, and \( \mu \) is a scaling factor.
+
+This reward function follows the design proposed by Zhang et al. \cite{Zhang2018DRL}.
 
 \subsection{Reward Structure and Termination Conditions}
 
@@ -150,7 +193,6 @@ Training is conducted using the \texttt{Stable Baselines3} implementation of A2C
     \item Upon completion, the model is saved to disk.
 \end{itemize}
 
-
 \section{Experimental Evaluation}
 
 This section presents the evaluation results of the navigation algorithms Greedy and A* over 100 runs (10 runs on each of 10 different terrain maps). The performance metrics considered include planned distance, actual distance traveled, completion time, average speed, and navigation outcome (success or failure).
@@ -159,12 +201,12 @@ This section presents the evaluation results of the navigation algorithms Greedy
 
 Table~\ref{tab:greedy_summary} shows the aggregated statistics for the Greedy algorithm across the 100 runs.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \caption{Summary statistics for the Greedy algorithm (100 runs).}
 \label{tab:greedy_summary}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
 Metric  & Mean & Std Dev & Min & Median & Max \\
 \midrule
@@ -175,8 +217,8 @@ Average Speed (m/s)  & 0.98 & 0.21 & 0.57 & 0.97 & 1.53 \\
 Result (Success=1)  & 0.80 & 0.40 & 0 & 1 & 1 \\
 \bottomrule
 \end{tabular}
-\end{table}
 }
+\end{table}
 
 The Greedy algorithm achieved a success rate of 80\%, with an average completion time of 117.41 seconds. The average speed was 0.98 m/s. The small difference between planned and traveled distance indicates generally efficient path following, although some variability is present.
 
@@ -184,12 +226,12 @@ The Greedy algorithm achieved a success rate of 80\%, with an average completion
 
 Table~\ref{tab:astar_summary} presents the summary statistics for the A* algorithm over the same set of runs.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \caption{Summary statistics for the A* algorithm (100 runs).}
 \label{tab:astar_summary}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
 Metric  & Mean & Std Dev & Min & Median & Max \\
 \midrule
@@ -200,8 +242,8 @@ Average Speed (m/s)  & 1.04 & 0.19 & 0.58 & 1.05 & 1.65 \\
 Result (Success=1)  & 0.85 & 0.36 & 0 & 1 & 1 \\
 \bottomrule
 \end{tabular}
-\end{table}
 }
+\end{table}
 
 The A* algorithm demonstrated a higher success rate of 85\% and slightly better average speed (1.04 m/s) compared to Greedy. The average completion time was lower at 109.03 seconds, reflecting the efficiency of the path planning.
 
