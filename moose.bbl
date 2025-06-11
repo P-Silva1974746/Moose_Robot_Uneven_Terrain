@@ -1,5 +1,35 @@
 \begin{thebibliography}{1}
 
+\bibitem{gan2022energy}
+Yunhao Gan et~al.
+\newblock Energy-based legged robots terrain traversability modeling via deep
+  inverse reinforcement learning.
+\newblock {\em arXiv preprint arXiv:2207.03034}, 2022.
+
+\bibitem{gonzalez2018deepterramechanics}
+Ramon Gonzalez and Karl Iagnemma.
+\newblock Deepterramechanics: Terrain classification and slip estimation for
+  ground robots via deep learning.
+\newblock {\em arXiv preprint arXiv:1806.07379}, 2018.
+
+\bibitem{mdpi2022randomization}
+Miguel Silva and Rui Oliveira.
+\newblock Evaluating domain randomization in deep reinforcement learning
+  locomotion tasks.
+\newblock {\em Mathematics}, 10(7):1123, 2022.
+
+\bibitem{slipnet2024}
+H.~Wang, Z.~Liu, et~al.
+\newblock Slipnet: Enhancing slip cost mapping for autonomous navigation.
+\newblock {\em arXiv preprint arXiv:2401.00001}, 2024.
+
+\bibitem{weerakoon2022terp}
+Kasun Weerakoon, Adarsh~Jagan Sathyamoorthy, Utsav Patel, and Dinesh Manocha.
+\newblock Terp: Reliable planning in uneven outdoor environments using deep
+  reinforcement learning.
+\newblock In {\em 2022 International Conference on Robotics and Automation
+  (ICRA)}, pages 9447--9453. IEEE, 2022.
+
 \bibitem{Zhang2018DRL}
 Kaichena Zhang, Farzad Niroui, Maurizio Ficocelli, and Goldie Nejat.
 \newblock Robot navigation of environments with unknown rough terrain using

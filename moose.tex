@@ -41,16 +41,28 @@ Mobile robots face significant challenges when navigating rough terrain, particu
 
 \section{Related Work}
 
-Several approaches have been proposed for mobile robot navigation, including traditional path planners like A* and greedy heuristics. These algorithms often rely on complete terrain information and do not explicitly optimise trajectory quality in uncertain environments. More recently, deep reinforcement learning has shown promise in solving complex control problems. Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for rough terrain navigation, demonstrating the potential of neural policy learning approaches in this domain.
+Several approaches have been proposed for mobile robot navigation, including traditional path planners such as A* and greedy heuristics. These classical algorithms often rely on complete and accurate terrain information and do not explicitly optimize trajectory quality in uncertain or uneven environments. More recently, deep reinforcement learning (DRL) has shown great promise in addressing complex control tasks for navigation in rough terrain.
+
+Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for robot navigation over unknown rough terrain, demonstrating the potential of neural policy learning to adapt to complex and uncertain environments without explicit prior knowledge of the terrain. This approach enables autonomous agents to learn navigation policies that implicitly encode safety and efficiency considerations.
+
+Subsequent works have incorporated terrain classification and slip estimation through deep learning methods to enhance robot perception and control \cite{gonzalez2018deepterramechanics}. Others have modeled terrain traversability and energy consumption of legged robots using inverse reinforcement learning, enabling more energy-efficient locomotion policies \cite{gan2022energy}.
+
+Recent advances also include the development of dynamic slip cost mapping techniques to improve autonomous navigation safety and efficiency \cite{slipnet2024}. Additionally, domain randomization techniques have been evaluated to improve the generalization capabilities of DRL locomotion policies trained in simulation for real-world applications \cite{mdpi2022randomization}.
+
+Reliable planning approaches combining terrain awareness and DRL have also been proposed to improve navigation robustness in uneven outdoor environments \cite{weerakoon2022terp}.
+
+Our approach combines terrain-aware perception, risk-aware planning, and deep reinforcement learning to jointly optimize navigation safety and energy efficiency in uneven outdoor environments, addressing limitations found in prior works by integrating these components into a unified framework.
+
 
 
 \section{Methodological Approach}
+In this section, we describe the experimental setup and the navigation strategies evaluated in our study. The Moose robot operates in a simulated uneven terrain environment, where each episode consists of a navigation task from a start point to a goal point. To ensure a fair and generalizable evaluation, the start and goal positions are randomly assigned at the beginning of every episode, for all tested methods—including Greedy, A*, and A2C-based reinforcement learning. This randomized configuration prevents overfitting to specific trajectories and promotes the development of robust navigation policies.
 
 \subsection{Terrain Generation Using Perlin Noise}
 
 To support the evaluation of navigation strategies in diverse topographical conditions, terrain surfaces are procedurally synthesised using Perlin noise — a gradient-based method known for generating smooth and naturalistic elevation profiles. This approach allows for the creation of continuous, non-repetitive landscapes that emulate real-world geographical features such as slopes, hills, and valleys.
 
-The simulation environment is built within Webots and incorporates a  200\(\times\)200 at defines a three-dimensional surface. Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to improve terrain characteristics, producing realistic elevation differences suitable for evaluating the robot's mobility and navigation performance.
+The simulation environment is built within Webots and incorporates a  200\(\times\)200 that defines a three-dimensional surface.Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to improve terrain characteristics, producing realistic elevation differences suitable for evaluating the robot's mobility and navigation performance.
 
 To integrate the generated elevation data, the world model is modified programmatically, replacing the standard height map with the synthesised terrain. The region immediately surrounding the robot's initial position is flattened during a post-processing step to ensure a stable start to the episode. The robot's initial coordinates are then adjusted to match this modified elevation, ensuring consistency between the terrain and the spawn location.
 
@@ -107,13 +119,13 @@ f(n) = g(n) + h(n)
 \]
 where $g(n)$ represents the cumulative cost from the origin to node $n$, computed as the Euclidean distance scaled by a terrain roughness factor derived from local elevation gradients. 
 
-To ensure physically plausible trajectories, impassable areas and steep inclines are assigned prohibitively high traversal costs. The slope at each cell is estimated via numerical gradients over a local elevation window, and terrain flatness is evaluatedby measuring the terrain gradient derived from local elevation differences.
+To ensure physically plausible trajectories, impassable areas and steep inclines are assigned prohibitively high traversal costs. The slope at each cell is estimated via numerical gradients over a local elevation window, and terrain flatness is evaluated by measuring the terrain gradient derived from local elevation differences.
 
 The heuristic term $h(n)$ estimates the remaining cost to the goal:
 \[
 h(n) = \lambda \cdot \sqrt{(x_g - x_n)^2 + (y_g - y_n)^2}
 \]
-where $\lambda$ modulates the influence of distance based on estimated terrain roughness. This formulation guides the planner towards geometrically direct yet traversable paths that respect the robot’s locomotion constraints.
+where $\lambda$ modulates the influence of distance based on estimated terrain roughness. This formulation guides the planner towards geometrically direct yet traversable paths that respect the Moose’s locomotion constraints.
 
 This enhanced cost model enables the planner to favour routes that avoid steep or unstable regions, promoting both efficiency and safety in terrain-constrained environments.
 \subsection{Robot Control via A2C}
