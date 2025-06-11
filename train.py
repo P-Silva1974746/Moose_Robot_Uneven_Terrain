@@ -23,18 +23,18 @@ if train:
     model.save(model_path)
     print("Modelo guardado com sucesso.")
 else:
-    count=500000
+    count=5
     start = count
     obs, info =env.reset()
     mile_stone = 0.1
     while count > 0:
         action, _states = model.predict(obs, deterministic=True)
         obs, reward, terminated, truncated, info = env.step(action)
-        count-=1
         progress=round(1-(count / start), 2)
 
         if progress > mile_stone:
             print(f"Progress {progress}%")
             mile_stone+=0.05
         if terminated or truncated:
+            count -= 1
             obs, info=env.reset()
