@@ -1,47 +1,76 @@
-\documentclass[11pt,twocolumn]{article}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
 
-\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
 \usepackage{graphicx}
-\usepackage{geometry}
-\geometry{margin=0.75in}
-\usepackage{titlesec}
-\usepackage{caption}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
-\usepackage{float}            
-\usepackage{newtxtext,newtxmath} 
-\usepackage{microtype}    
+\usepackage{textcomp}
+\usepackage{xcolor}
 \usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{hyperref}        
 
-\titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
-\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{1em}{}
-\captionsetup[figure]{font=small}
-
-\title{Deep Reinforcement Learning for Efficient Navigation of the Moose Robot}
-\author{Constança Fernandes \and Isabel Sá \and Pedro Silva}
-\date{\today}
-
-
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\twocolumn[
+\title{Deep Reinforcement Learning for Efficient Navigation of the Moose Robot}
+
+\author{
+    \IEEEauthorblockN{Constança Fernandes}
+    \IEEEauthorblockA{
+        Department of Computer Science \\
+        University of Porto, Portugal \\
+        up202205398@edu.fc.up.pt
+    }
+    \and
+    \IEEEauthorblockN{Isabel Sá}
+    \IEEEauthorblockA{
+        Department of Computer Science \\
+        University of Porto, Portugal \\
+        up202205388@edu.fc.up.pt
+    }
+    \and
+    \IEEEauthorblockN{Pedro Silva}
+    \IEEEauthorblockA{
+        Department of Computer Science \\
+        University of Porto, Portugal \\
+        202205150@edu.fc.up.pt
+    }
+}
+
+
 \maketitle
 
 \begin{abstract}
-\noindent
 This paper presents a deep reinforcement learning (DRL) approach for efficient navigation of the Moose robot in complex environments with unknown rough terrain. We train an Advantage Actor-Critic (A2C) model to optimise the robot's trajectory while maintaining navigation performance. The proposed solution is validated in simulation using diverse terrain maps, and its effectiveness is compared with traditional planning algorithms such as Greedy and A*.
 \end{abstract}
-\vspace{1em}
-]
+
+\begin{IEEEkeywords}
+Reinforcement Learning, Navigation, Rough Terrain, A2C, Moose Robot
+\end{IEEEkeywords}
+
 
 \section{Introduction}
-Mobile robots face significant challenges when navigating rough terrain, particularly in terms of balancing robustness and speed. The Moose robot, equipped with various sensors, provides a suitable platform for exploring intelligent navigation strategies. The aim of this work is to train a DRL model that allows Moose to autonomously reach target locations efficiently, optimising its trajectory for reliable navigation.
+Mobile robotic navigation in unstructured and rough terrains remains a formidable challenge due to the inherent trade-offs between robustness, efficiency, and adaptability. Real-world environments often present complex, uneven surfaces with varying slopes, obstacles, and uncertain conditions that severely limit the applicability of classical path planning methods. These traditional algorithms, while efficient in structured or well-mapped domains, struggle to maintain performance and safety when faced with irregular terrains or incomplete sensory information.
+
+The Moose robot, a versatile mobile platform equipped with multimodal sensors including GPS, IMU, and LIDAR, offers an ideal testbed for advancing autonomous navigation research in such difficult scenarios. Its mobility capabilities enable exploration of novel control strategies that leverage rich perceptual inputs to negotiate rough terrain effectively.
+
+Recent breakthroughs in deep reinforcement learning (DRL) have demonstrated promising results in enabling agents to learn complex navigation policies from raw sensory data, without explicit modeling of terrain or environmental dynamics. DRL techniques inherently balance exploration and exploitation, adapting to varying conditions by optimizing reward-driven behavior. This capability is particularly valuable for navigating uncertain and dynamic environments where precomputed paths may become invalid or unsafe.
+
+This work aims to develop and rigorously evaluate a DRL-based navigation framework for the Moose robot that autonomously reaches target locations by optimally planning trajectories that maximize safety, energy efficiency, and traversal speed. By integrating terrain-aware perception, risk-sensitive planning, and continuous control through an Advantage Actor-Critic (A2C) algorithm, our approach seeks to overcome the limitations of purely geometric or heuristic path planners.
+
+The contributions of this study are threefold:
+(i) the implementation of a synthetic terrain generation pipeline based on Perlin noise to simulate diverse and realistic topographies for training and evaluation;
+(ii) the integration and comparative analysis of classical (Greedy and A*) and learning-based navigation methods within a consistent simulation framework;
+(iii) a detailed examination of DRL policy robustness and generalization across varying terrain complexities and randomized navigation tasks.
+
+Through extensive experiments in a high-fidelity simulation environment, this research provides new insights into the capabilities and limitations of DRL for autonomous rough-terrain navigation, paving the way for practical deployment of mobile robots in challenging outdoor scenarios
 
 \section{Related Work}
 
-Several approaches have been proposed for mobile robot navigation, including traditional path planners such as A* and greedy heuristics. These classical algorithms often rely on complete and accurate terrain information and do not explicitly optimize trajectory quality in uncertain or uneven environments. More recently, deep reinforcement learning (DRL) has shown great promise in addressing complex control tasks for navigation in rough terrain.
+Several approaches have been proposed for mobile robot navigation, including traditional path planners such as A* and greedy heuristics. These classical algorithms often rely on complete and accurate terrain information and do not explicitly optimise trajectory quality in uncertain or uneven environments. More recently, deep reinforcement learning (DRL) has shown great promise in addressing complex control tasks for navigation in rough terrain.
 
 Notably, Zhang et al. \cite{Zhang2018DRL} introduced a DRL-based framework for robot navigation over unknown rough terrain, demonstrating the potential of neural policy learning to adapt to complex and uncertain environments without explicit prior knowledge of the terrain. This approach enables autonomous agents to learn navigation policies that implicitly encode safety and efficiency considerations.
 
@@ -51,19 +80,19 @@ Recent advances also include the development of dynamic slip cost mapping techni
 
 Reliable planning approaches combining terrain awareness and DRL have also been proposed to improve navigation robustness in uneven outdoor environments \cite{weerakoon2022terp}.
 
-Our approach combines terrain-aware perception, risk-aware planning, and deep reinforcement learning to jointly optimize navigation safety and energy efficiency in uneven outdoor environments, addressing limitations found in prior works by integrating these components into a unified framework.
-
+Our approach integrates terrain-aware perception, risk-aware planning, and deep reinforcement learning into a unified framework to optimise navigation safety and efficiency in uneven environments, overcoming limitations of previous methods
 
 \section{Methodological Approach}
+
 In this section, we describe the experimental setup and the navigation strategies evaluated in our study. The Moose robot operates in a simulated uneven terrain environment, where each episode consists of a navigation task from a start point to a goal point. To ensure a fair and generalizable evaluation, the start and goal positions are randomly assigned at the beginning of every episode, for all tested methods—including Greedy, A*, and A2C-based reinforcement learning. This randomized configuration prevents overfitting to specific trajectories and promotes the development of robust navigation policies.
 
 \subsection{Terrain Generation Using Perlin Noise}
 
-To support the evaluation of navigation strategies in diverse topographical conditions, terrain surfaces are procedurally synthesised using Perlin noise — a gradient-based method known for generating smooth and naturalistic elevation profiles. This approach allows for the creation of continuous, non-repetitive landscapes that emulate real-world geographical features such as slopes, hills, and valleys.
+To support the evaluation of navigation strategies in diverse topographical conditions, terrain surfaces are procedurally synthesised using Perlin noise — a gradient-based method known for generating smooth and naturalistic elevation profiles. Perlin noise is preferred over other noise models such as white noise or Simplex noise because it produces continuous, coherent gradients that mimic natural terrain features without abrupt transitions or overly repetitive patterns.
 
-The simulation environment is built within Webots and incorporates a  200\(\times\)200 that defines a three-dimensional surface.Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to improve terrain characteristics, producing realistic elevation differences suitable for evaluating the robot's mobility and navigation performance.
+The simulation environment is built within Webots and ... incorporates a \(200 \times 200\)~\text{cells} grid that defines a three-dimensional surface. Terrain generation is based on a custom implementation of 2D Perlin noise, configured with a single octave and no bias correction. The resulting noise values are scaled to improve terrain characteristics, producing realistic elevation differences suitable for evaluating the robot's mobility and navigation performance.
 
-To integrate the generated elevation data, the world model is modified programmatically, replacing the standard height map with the synthesised terrain. The region immediately surrounding the robot's initial position is flattened during a post-processing step to ensure a stable start to the episode. The robot's initial coordinates are then adjusted to match this modified elevation, ensuring consistency between the terrain and the spawn location.
+To integrate the generated elevation data, the world model is modified programmatically, replacing the standard height map with the synthesised terrain. Importantly, the region immediately surrounding the robot's initial position is flattened during a post-processing step to avoid initial instability, such as unwanted tipping or sliding, at the start of each episode. The robot's initial coordinates are then adjusted to match this modified elevation, ensuring consistency between the terrain and the spawn location.
 
 The procedural generation pipeline includes tools for analysing and visualising terrain characteristics. Statistical summaries — such as mean, standard deviation, and elevation range — are calculated to assess the spatial variability of each generated map. In addition, elevation surface heatmaps are produced using perceptually uniform colour gradients, allowing for quick visual inspection of terrain diversity.
 
@@ -74,10 +103,9 @@ The procedural generation pipeline includes tools for analysing and visualising 
     \label{fig:heatmap_terrain}
 \end{figure}
 
-
 This synthetic terrain generation framework supports the randomisation of domains important for training, allowing learning and planning algorithms to generalise to a wide variety of environmental conditions. By adjusting noise parameters such as scale and frequency, it is possible to control the complexity and slope of the generated maps, facilitating systematic testing of the robustness of navigation policies.
 
-\subsection{Greedy Navigation Controller}
+\subsection{Greedy Navigation Approach}
 
 As a baseline control strategy, a rule-based greedy navigation controller was implemented to guide the robot towards the target using only local sensor data.
 
@@ -87,7 +115,7 @@ The controller prioritises actions that reduce the Euclidean distance to the tar
 \[
 d_t = \sqrt{(x_g - x_t)^2 + (y_g - y_t)^2}
 \]
-It then calculates the angular deviation $\Delta\theta$ between the robot's orientation and the vector to the goal. If $|\Delta\theta| > 0.01745$ radians (1 degree), the robot rotates in place to align with the goal direction. Once alignment is achieved, it proceeds forward with a constant velocity.
+It then calculates the angular deviation \(\Delta\theta\) between the robot's orientation and the vector to the goal. If \(|\Delta\theta| > 0.01745\) radians (1 degree), the robot rotates in place to align with the goal direction. Note that this threshold is a hyperparameter and can be tuned to balance between precision and responsiveness. Once alignment is achieved, it proceeds forward with a constant velocity.
 
 In addition to heading control, the robot monitors its pitch and roll values continuously. If these exceed a predefined inclination threshold (indicating unsafe slopes), the robot prioritises stability by entering a recovery manoeuvre: it induces rotation in the direction opposite to the tilt. This behaviour prevents traversal of steep regions and reduces the risk of falling or flipping, thereby improving navigation safety.
 
@@ -100,7 +128,7 @@ To detect stagnation or local minima, the controller compares successive GPS pos
 An episode terminates under the following conditions:
 
 \begin{itemize}
-    \item The robot reaches within a specified proximity to the goal.
+    \item The robot reaches within a specified proximity to the goal. This proximity threshold is also a configurable parameter and can be adjusted depending on task requirements.
     \item A timeout of 120 seconds is exceeded.
 \end{itemize}
 
@@ -110,7 +138,7 @@ Despite its simplicity, this greedy strategy establishes a valuable performance 
 
 Navigation commences with a global planning module based on the A* search algorithm, adapted to account for terrain irregularities. The operational environment is discretised into a two-dimensional grid, with each cell assigned a traversal cost influenced by local terrain features, such as slope and elevation.
 
-Each cell considers an \textbf{8-connected neighborhood}, allowing transitions in both axial and diagonal directions. Diagonal movements incur higher traversal costs, reflecting their increased Euclidean distance ($\sqrt{2}$) relative to axial steps. This preserves geometric consistency and penalises sharp turns on rugged terrain.
+Each cell considers an 8-connected neighborhood, allowing transitions in both axial and diagonal directions. Diagonal movements incur higher traversal costs, reflecting their increased Euclidean distance ($\sqrt{2}$) relative to axial steps. This preserves geometric consistency and penalises sharp turns on rugged terrain.
 
 The pathfinding cost function is defined as:
 \[
@@ -120,89 +148,113 @@ where $g(n)$ represents the cumulative cost from the origin to node $n$, compute
 
 To ensure physically plausible trajectories, impassable areas and steep inclines are assigned prohibitively high traversal costs. The slope at each cell is estimated via numerical gradients over a local elevation window, and terrain flatness is evaluated by measuring the terrain gradient derived from local elevation differences.
 
-The heuristic term $h(n)$ estimates the remaining cost to the goal:
+The heuristic term \(h(n)\) estimates the remaining cost to the goal:
 \[
 h(n) = \lambda \cdot \sqrt{(x_g - x_n)^2 + (y_g - y_n)^2}
 \]
-where $\lambda$ modulates the influence of distance based on estimated terrain roughness. This formulation guides the planner towards geometrically direct yet traversable paths that respect the Moose’s locomotion constraints.
+where \(\lambda\) is a weighting factor (or tuning parameter) that modulates the influence of the Euclidean distance based on estimated terrain roughness. This formulation guides the planner towards geometrically direct yet traversable paths that respect the Moose’s locomotion constraints.
 
 This enhanced cost model enables the planner to favour routes that avoid steep or unstable regions, promoting both efficiency and safety in terrain-constrained environments.
+
 \subsection{Robot Control via A2C}
 
-An alternative control architecture employs the Advantage Actor-Critic (A2C) algorithm. In this setup, a reinforcement learning (RL) agent interacts with the robot via a TCP/IP socket interface, enabling external control of motor velocities based on continuous feedback from the environment.
+To achieve adaptive and efficient locomotion over challenging terrains, a reinforcement learning-based controller was implemented using the Advantage Actor-Critic (A2C) algorithm. The control architecture integrates with a simulated robotic platform through a socket-based interface, which enables asynchronous communication between the learning agent and the physical simulation. At each timestep, the agent receives observations from the environment and returns continuous velocity commands for actuation.
 
 \paragraph{Action Space}
 
-The robot operates in a continuous action space:
+The robot operates within a continuous action space defined by two scalar values representing the normalised target velocities for the left and right wheel groups:
 \[
 a = [v_{\text{left}}, v_{\text{right}}], \quad v \in [-1, 1]
 \]
-where $v_{\text{left}}$ and $v_{\text{right}}$ represent the normalized velocities of the left and right wheels, respectively.
+The resulting actions are linearly scaled and applied to the corresponding wheel motors via velocity-based control, enabling smooth and interpretable locomotion.
 
 \paragraph{Observation Space}
 
-The agent receives a six-dimensional observation vector consisting of:
-
+At each control step, the agent receives a structured observation vector comprising proprioceptive and exteroceptive information:
 \begin{itemize}
-    \item 3D position $(x, y, z)$ obtained via GPS.
-    \item Orientation $(\phi, \theta, \psi)$ (roll, pitch, yaw) obtained from the IMU.
+    \item The robot's 3D position $(x, y, z)$, retrieved from onboard GPS.
+    \item Orientation angles $(\phi, \theta, \psi)$ (roll, pitch, yaw), provided by the inertial measurement unit (IMU).
+    \item Local terrain elevation extracted from a digital elevation map.
+    \item A point cloud obtained from a 4-layer sparse 3D LIDAR, enabling obstacle detection and spatial perception.
+    \item The relative displacement vector to the goal location.
+    \item The absolute 3D coordinates of the goal $(x_{\text{goal}}, y_{\text{goal}}, z_{\text{goal}})$.
 \end{itemize}
 
-This state representation provides sufficient spatial awareness for navigating uneven terrain.
+This multi-modal representation ensures that the agent maintains both spatial and situational awareness necessary for navigation over irregular and potentially unstable terrain.
 
 \paragraph{Reward Function}
 
-The reward signal \( R_t \) at time step \( t \) is defined as:
+The reward function is designed to balance goal-seeking behaviour with motion efficiency and operational safety. The scalar reward signal at each timestep \( R_t \) incorporates the following elements:
 \[
-R_t = 
+R_t =
 \begin{cases}
-0.5 + \frac{d_{\text{start}}}{T_{\text{total}}} & \text{if goal reached} \\
-\mu \cdot \frac{d_{\min} - d_t}{\Delta t} & \text{if progress is made} \\
--0.5 & \text{if stuck too long} \\
+r_{\text{goal}} & \text{if the goal is reached} \\
+r_{\text{progress}} & \text{if the agent approaches the goal} \\
+r_{\text{stagnation}} & \text{if the agent remains idle} \\
+r_{\text{penalty}} & \text{if the agent becomes stuck or flips} \\
 0 & \text{otherwise}
 \end{cases}
 \]
-where \( d_t \) is the current distance to the goal, \( d_{\min} \) is the minimal distance reached so far, \( T_{\text{total}} \) is the elapsed time, and \( \mu \) is a scaling factor.
-
-This reward function follows the design proposed by Zhang et al. \cite{Zhang2018DRL}.
+where \( r_{\text{goal}} \) is a shaped terminal reward based on the distance travelled and time efficiency, \( r_{\text{progress}} \) is a continuous signal encouraging reduction in goal distance, and \( r_{\text{stagnation}} \) is a negative reward applied when positional changes fall below a defined threshold over a prolonged interval.
 
 \subsection{Reward Structure and Termination Conditions}
 
-The reward function is designed to promote efficient and goal-directed navigation:
+This conceptual reward framework is instantiated in practice as:
+\[
+R_t = 
+\begin{cases}
+0.5 + \frac{d_{\text{start}}}{T_{\text{total}}} & \text{if } d_t \leq d_g \text{ (goal reached)} \\
+\mu \cdot \frac{d_{\min} - d_t}{\Delta t} & \text{if } d_t < d_{\min} \text{ (progress is made)} \\
+-0.5 & \text{if stuck too long, timeout, or robot fell} \\
+0 & \text{otherwise}
+\end{cases}
+\]
 
+
+This reward design is shaped to encourage both navigation efficiency — by rewarding progress towards the goal and penalising delays — and safety, by discouraging behaviours that result in the robot becoming stuck or falling, which is critical in rough terrain environments.
+
+where:
 \begin{itemize}
-    \item \textbf{Success:} Bonus proportional to initial distance and time efficiency.
-    \item \textbf{Progress:} Reward for reducing distance to the goal.
-    \item \textbf{Stagnation:} Penalty for extended inactivity.
-    \item \textbf{Timeout:} Episode terminates with penalty after 120 seconds without reaching the goal.
+    \item \( d_t \): current Euclidean distance to the goal.
+    \item \( d_{\min} \): minimum distance to the goal achieved so far.
+    \item \( d_{\text{start}} \): initial distance from start to goal.
+    \item \( T_{\text{total}} \): total elapsed time since the beginning of the episode.
+    \item \( \Delta t \): time interval between steps.
+    \item \( \mu \): positive scaling factor.
 \end{itemize}
 
-Stuck conditions are detected by monitoring positional changes over time, preventing indefinite non-progress states.
+Three termination conditions are monitored:
+\begin{enumerate}
+    \item The robot reaches the goal (\( d_t \leq d_g \)).
+    \item The robot is stuck for more than a threshold number of steps.
+    \item The robot falls off the terrain or exceeds the episode time limit (600 seconds).
+\end{enumerate}
 
-\subsection{Reinforcement Learning Environment}
+These criteria help to ensure efficient navigation and to penalize non-progress behavior. This reward structure follows the design proposed by Zhang et al.~\cite{Zhang2018DRL}.
+An additional termination condition is triggered when the robot falls outside the map boundaries, which can occur due to the absence of physical constraints (e.g., walls) in the simulated environment. The timeout threshold was set to 600 seconds to allow extended learning per episode; however, this limit was rarely reached during training, as the robot typically succeeded or failed earlier.
 
-The control architecture is implemented as a Gymnasium-compatible environment, \texttt{MooseEnv}, which abstracts the Webots simulation and facilitates interaction with standard RL algorithms. It defines:
+\subsection{Training Protocol}
 
+Training employed a synchronous Advantage Actor-Critic (A2C) algorithm, where both the actor and critic were parameterised by a shared multilayer perceptron (MLP).The environment used for training and evaluation was the custom \texttt{MooseEnv}, providing continuous control of motor velocities and terrain observations.
+The \texttt{MooseEnv} environment provides continuous motor control and multi-modal observations, including proprioceptive data, terrain elevation, and a 4-layer LIDAR point cloud.
+
+Key hyperparameters include:
 \begin{itemize}
-    \item A continuous action space for wheel velocities in \([-1, 1]\).
-    \item A continuous observation space with 3D position and orientation.
-    \item \texttt{reset} and \texttt{step} methods that manage simulation episodes via socket-based communication.
+    \item Learning rate: \(1 \times 10^{-4}\)
+    \item Discount factor: \(\gamma = 0.99\)
+    \item Entropy coefficient: 0.01 (to encourage exploration)
+    \item Policy architecture: two hidden layers with ReLU activation functions
 \end{itemize}
 
-This modular interface enables seamless experimentation with various RL algorithms, decoupling control policies from simulation logic.
+The agent was trained for 100{,}000 timesteps on each procedurally generated terrain map, cycling through a diverse set of environments designed to expose the agent to varying slopes, obstacles, and elevation patterns. This curriculum-style training strategy aimed to promote generalisation and terrain-aware behaviour. Over the full training regime, a total of 3 million timesteps were executed.
 
-\subsection{Reinforcement Learning Training Setup}
+Training progress and performance metrics—such as cumulative reward, episode length, and goal success rate—were logged via TensorBoard. Periodic evaluations in deterministic mode were conducted to assess policy robustness.
 
-Training is conducted using the \texttt{Stable Baselines3} implementation of A2C. The script \texttt{train.py} automates the training workflow:
+A checkpointing mechanism was implemented to save the model periodically. If a pre-existing checkpoint was found, training resumed without resetting the timestep counter; otherwise, training was initiated from scratch.
 
-\begin{itemize}
-    \item Initializes the \texttt{MooseEnv} environment wrapping the Webots simulation.
-    \item Creates the directory \texttt{models/a2c\_moose} for storing model checkpoints.
-    \item If a pretrained model (\texttt{a2c\_moose\_model.zip}) is found, it resumes training from that checkpoint.
-    \item Otherwise, it initializes a new A2C agent with an MLP policy, learning rate of $1 \times 10^{-4}$, and TensorBoard logging enabled.
-    \item The agent is trained for 100,000 timesteps with verbose logging.
-    \item Upon completion, the model is saved to disk.
-\end{itemize}
+During evaluation, the agent executed multiple episodes in deterministic mode, with progress feedback printed at regular intervals. Episodes terminated upon reaching the goal, falling off terrain, or exceeding the maximum allowed episode duration.
+
+This training protocol enabled the development of a robust navigation policy capable of adapting to diverse terrain conditions and randomized goal positions with minimal supervision.
 
 \section{Experimental Evaluation}
 
