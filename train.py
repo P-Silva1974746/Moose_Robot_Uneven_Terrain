@@ -2,12 +2,12 @@ import os
 from stable_baselines3 import A2C
 from moose_gym import MooseEnv
 
-train=False
+train=True
 
 env = MooseEnv()
 
 save_dir = "models/a2c_moose"
-model_path = f"{save_dir}/a2c_moose_model_v3"
+model_path = f"{save_dir}/a2c_moose_model_v5"
 
 os.makedirs(save_dir, exist_ok=True)
 
@@ -19,11 +19,11 @@ else:
     model = A2C("MlpPolicy", env, verbose=1, learning_rate=0.0001, tensorboard_log="./a2c_moose/")
 
 if train:
-    model.learn(total_timesteps=500000, tb_log_name="A2C_v3", reset_num_timesteps=False)
+    model.learn(total_timesteps=1000000, tb_log_name="A2C_v5", reset_num_timesteps=False)
     model.save(model_path)
     print("Modelo guardado com sucesso.")
 else:
-    count=5
+    count=10
     start = count
     obs, info =env.reset()
     mile_stone = 0.1
