@@ -65,14 +65,9 @@ conn, _ = server.accept()
 grid_min = -25
 grid_max = 25
 
-goal = [
-        random.uniform(35, 165),  # x aleatório
-        random.uniform(35, 165),  # y aleatório
-        0.0                             # Altura Z definida separadamente
-]
-goal[2] = height_at(x=goal[0], y=goal[1], h_v=height_values) + 0.2 # +0.2 so that it isn't on the ground
 
-d_g = 0.5
+
+d_g = 5
 mu = 0.05
 stuck_counter = 0
 max_stuck_steps = 10000 # since each timeset are 4 mms this is equivalent to 40 sec
@@ -86,16 +81,24 @@ last_time = start_time
 last_pos = start_pos
 total_steps = 0
 
+# goal setup at a maximum of 50
+max_dist_travel = 35
+goal = [
+        random.uniform(max(20,start_pos[0]-max_dist_travel), min(180, start_pos[0]+max_dist_travel)),  # x aleatório
+        random.uniform(max(20,start_pos[1]-max_dist_travel), min(180, start_pos[1]+max_dist_travel)),  # x aleatório
+        0.0                             # Altura Z definida separadamente
+]
+goal[2] = height_at(x=goal[0], y=goal[1], h_v=height_values) + 0.2 # +0.2 so that it isn't on the ground
 # to limit clutter of prints in of progress
 count=0
 
 # log information
-logging=True
+logging=False
 total_distance = 0
 avg_speed=0
 completed=False
 heights=[]
-log_path="controllers/moose_gym/logs/performance.csv"
+log_path="controllers/moose_gym/logs/performance_v5.csv"
 
 while supervisor.step(timestep) != -1:
     try:
@@ -132,7 +135,7 @@ while supervisor.step(timestep) != -1:
                 total_time = current_time - start_time
                 d_start = math.sqrt(sum((start_pos[i] - goal[i]) ** 2 for i in range(3)))
                 r_v = d_start / (total_time + 1e-8)
-                reward = 0.5 + r_v
+                reward = 1000 + r_v
                 print("Goal reached!!!")
                 done = True
                 completed=True
@@ -147,6 +150,7 @@ while supervisor.step(timestep) != -1:
                     print("Timeout exceeded")
                 elif pos[2]<-100:
                     print("Robot fall of the side of the map")
+                    reward = -100
                 done = True
                 completed=False
             else:
@@ -168,7 +172,7 @@ while supervisor.step(timestep) != -1:
             delta = math.sqrt(sum((pos[i] - last_pos[i]) ** 2 for i in range(3)))
 
             # this means that the robot must be moving more than 0.9 km/h in order to not be considered stuck
-            if delta < 0.01:
+            if delta < 0.001:
                 stuck_counter += 1
                 #print(f"STUCK: {stuck_counter}")
             else:
@@ -213,12 +217,18 @@ while supervisor.step(timestep) != -1:
         elif data["cmd"] == "reset":
             # Reset do estado
             print("Resetting robot")
+
+            # goal setup at a maximum of 50
+            max_dist_travel = 35
             goal = [
-                random.uniform(35, 165),  # x aleatório
-                random.uniform(35, 165),  # y aleatório
-                0.0
+                random.uniform(max(20, start_pos[0] - max_dist_travel), min(180, start_pos[0] + max_dist_travel)),
+                # x aleatório
+                random.uniform(max(20, start_pos[1] - max_dist_travel), min(180, start_pos[1] + max_dist_travel)),
+                # x aleatório
+                0.0  # Altura Z definida separadamente
             ]
             goal[2] = height_at(x=goal[0], y=goal[1], h_v=height_values) + 0.2 # +0.2 so that it isn't on the ground
+
             print(f"Goal: {goal}")
             robot.getField("translation").setSFVec3f(start_pos)
             robot.getField("rotation").setSFRotation(start_rotation)
@@ -243,12 +253,12 @@ while supervisor.step(timestep) != -1:
             total_steps = 0
 
             # log information
-            logging = True
+            logging = False
             total_distance = 0
             avg_speed = 0
             completed = False
             heights = []
-            log_path = "controllers/moose_gym/logs/performance.csv"
+            log_path = "controllers/moose_gym/logs/performance_v5.csv"
 
             obs = sanitize_observation(obs)
             send_msg(conn, obs)
