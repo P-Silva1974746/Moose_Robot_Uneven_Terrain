@@ -2,7 +2,7 @@ import os
 from stable_baselines3 import A2C
 from moose_gym import MooseEnv
 
-train=True
+train=False
 
 env = MooseEnv()
 
