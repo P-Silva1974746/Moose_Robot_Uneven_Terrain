@@ -61,11 +61,6 @@ server.bind(("localhost", 10000))
 server.listen(1)
 conn, _ = server.accept()
 
-# parâmetros
-grid_min = -25
-grid_max = 25
-
-
 
 d_g = 5
 mu = 0.05
@@ -93,12 +88,12 @@ goal[2] = height_at(x=goal[0], y=goal[1], h_v=height_values) + 0.2 # +0.2 so tha
 count=0
 
 # log information
-logging=False
+logging = True
 total_distance = 0
 avg_speed=0
 completed=False
 heights=[]
-log_path="controllers/moose_gym/logs/performance_v5.csv"
+log_path="controllers/moose_gym/logs/performance_v5_map2.csv"
 
 while supervisor.step(timestep) != -1:
     try:
@@ -142,15 +137,15 @@ while supervisor.step(timestep) != -1:
             elif d_t < min_dist:
                 reward = mu * (min_dist - d_t) / (delta_t + 1e-8)
                 done = False
-            elif stuck_counter > max_stuck_steps or current_time - start_time > 600 or pos[2]<-100:
-                reward = -0.5
-                if stuck_counter > max_stuck_steps:
+            elif stuck_counter > max_stuck_steps or current_time - start_time > 600 or pos[2]<-100 :#or abs(rpy[0])>(math.pi/2):
+                reward = -100
+                if stuck_counter > max_stuck_steps or abs(rpy[0])>(math.pi/2):
                     print("Robot is stuck")
                 elif current_time - start_time > 600:
                     print("Timeout exceeded")
                 elif pos[2]<-100:
                     print("Robot fall of the side of the map")
-                    reward = -100
+                    reward = -1000
                 done = True
                 completed=False
             else:
@@ -187,14 +182,17 @@ while supervisor.step(timestep) != -1:
             #print(reward)
 
             if logging and done:
-                euclidean_dist= math.hypot(goal[0] - pos[0], goal[1] - pos[1], goal[2] - pos[2])
+                euclidean_dist= math.hypot(goal[0] - start_pos[0], goal[1] - start_pos[1], goal[2] - start_pos[2])
                 total_time = current_time - start_time
                 avg_speed = total_distance / total_time
                 height_difference= np.max(heights) - np.min(heights)
+                height_std = np.std(heights)
                 print(f"Distância total percorrida: {total_distance} metros")
                 print(f"Tempo total: {total_time} segundos")
                 print(f"Velocidade media: {avg_speed} m/s")
                 print(f"Diferenca de altitude: {height_difference} m")
+                print(f"Std da altitude: {height_std} m")
+                print(f"Distancia minima ao goal: {min_dist} m")
                 print(f"Completou a run: {completed}")
 
                 data = {
@@ -203,7 +201,9 @@ while supervisor.step(timestep) != -1:
                     "Time": [total_time],
                     "Avg Speed": [avg_speed],
                     "Height Difference": [height_difference],
-                    "Completion": [completed]
+                    "Height Std": [height_std],
+                    "Minimum distance to goal": [min_dist],
+                    "Completion": [completed],
                 }
 
                 df = pd.DataFrame(data=data)
@@ -253,12 +253,12 @@ while supervisor.step(timestep) != -1:
             total_steps = 0
 
             # log information
-            logging = False
+            logging = True
             total_distance = 0
             avg_speed = 0
             completed = False
             heights = []
-            log_path = "controllers/moose_gym/logs/performance_v5.csv"
+            log_path = "controllers/moose_gym/logs/performance_v5_map2.csv"
 
             obs = sanitize_observation(obs)
             send_msg(conn, obs)
