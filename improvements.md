@@ -26,5 +26,6 @@ of the A2C model:
 
 Extensive training
 -
-The training regime is still the same, 100 000 timesteps per map, however the model was trained longer in order to try to
-reach the conversion of the mean reward rollout per episode, the model was trained in total for 10 million timesteps 
+The training regime is still the same, 100 000 timesteps per map as described in the section 3F of our paper, however the
+model was trained longer in order to try to reach the conversion of the mean reward rollout per episode, the model was trained 
+in total for 10 million timesteps
